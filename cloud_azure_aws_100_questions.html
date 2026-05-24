@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloud · Azure · AWS — 100 Questions</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f2eb;
+    --surface: #edeae0;
+    --card: #fff;
+    --border: #d6d0c4;
+    --text: #1a1714;
+    --muted: #8a8070;
+    --accent-aws: #e8530a;
+    --accent-azure: #0078d4;
+    --accent-cloud: #1db954;
+    --accent-iam: #7c3aed;
+    --accent-net: #0891b2;
+    --accent-cost: #b45309;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-hover: 0 8px 32px rgba(0,0,0,0.14);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Halftone texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 1px);
+    background-size: 18px 18px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HERO ─────────────────────────────────────────── */
+  .hero {
+    position: relative;
+    z-index: 1;
+    padding: 70px 40px 50px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 40px;
+  }
+
+  .hero-left {}
+
+  .provider-pills {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 5px 14px;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .pill-aws { background: var(--accent-aws); color: #fff; }
+  .pill-azure { background: var(--accent-azure); color: #fff; }
+  .pill-cloud { background: var(--text); color: var(--bg); }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(72px, 10vw, 140px);
+    line-height: 0.88;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  h1 span.highlight-aws { color: var(--accent-aws); }
+  h1 span.highlight-az { color: var(--accent-azure); }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--muted);
+    font-weight: 300;
+    font-style: italic;
+    max-width: 500px;
+    line-height: 1.6;
+  }
+
+  .hero-right {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-end;
+  }
+
+  .stat-block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 20px;
+    text-align: right;
+    box-shadow: var(--shadow);
+    min-width: 130px;
+  }
+
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .stat-label {
+    font-family: 'Fira Code', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* ── DIVIDER ─────────────────────────────────────── */
+  .divider {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+    border-top: 2px solid var(--text);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── CONTROLS ────────────────────────────────────── */
+  .controls-wrap {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 40px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .filter-btn {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    padding: 7px 14px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.18s;
+    text-transform: uppercase;
+  }
+
+  .filter-btn:hover { border-color: var(--text); color: var(--text); }
+  .filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .filter-btn[data-cat="aws"].active { background: var(--accent-aws); border-color: var(--accent-aws); color:#fff; }
+  .filter-btn[data-cat="azure"].active { background: var(--accent-azure); border-color: var(--accent-azure); color:#fff; }
+  .filter-btn[data-cat="cloud"].active { background: var(--accent-cloud); border-color: var(--accent-cloud); color:#fff; }
+  .filter-btn[data-cat="iam"].active { background: var(--accent-iam); border-color: var(--accent-iam); color:#fff; }
+  .filter-btn[data-cat="networking"].active { background: var(--accent-net); border-color: var(--accent-net); color:#fff; }
+  .filter-btn[data-cat="cost"].active { background: var(--accent-cost); border-color: var(--accent-cost); color:#fff; }
+
+  .spacer { flex: 1; }
+
+  .search-input {
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: var(--card);
+    color: var(--text);
+    outline: none;
+    width: 220px;
+    transition: border-color 0.2s;
+  }
+
+  .search-input:focus { border-color: var(--text); }
+  .search-input::placeholder { color: var(--muted); }
+
+  .reset-btn {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    padding: 7px 14px;
+    border: 1px solid var(--accent-aws);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--accent-aws);
+    cursor: pointer;
+    transition: all 0.18s;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .reset-btn:hover { background: var(--accent-aws); color: #fff; }
+
+  /* ── PROGRESS ────────────────────────────────────── */
+  .progress-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-aws), var(--accent-azure));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-text {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── QUESTIONS GRID ──────────────────────────────── */
+  .questions-container {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+    gap: 12px;
+  }
+
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px 22px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
+    position: relative;
+    animation: riseUp 0.35s ease both;
+  }
+
+  .q-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+    border-color: var(--text);
+  }
+
+  .q-card.answered {
+    background: #f0faf4;
+    border-color: #86efac;
+  }
+
+  .q-card.answered::after {
+    content: '✓';
+    position: absolute;
+    top: 16px; right: 16px;
+    color: #16a34a;
+    font-size: 13px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* Left accent bar */
+  .q-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    border-radius: 4px 0 0 4px;
+  }
+
+  .q-card[data-cat="aws"]::before { background: var(--accent-aws); }
+  .q-card[data-cat="azure"]::before { background: var(--accent-azure); }
+  .q-card[data-cat="cloud"]::before { background: var(--accent-cloud); }
+  .q-card[data-cat="iam"]::before { background: var(--accent-iam); }
+  .q-card[data-cat="networking"]::before { background: var(--accent-net); }
+  .q-card[data-cat="cost"]::before { background: var(--accent-cost); }
+
+  .q-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .q-num {
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    flex-shrink: 0;
+    margin-top: 3px;
+    min-width: 32px;
+  }
+
+  .q-body { flex: 1; }
+
+  .q-meta {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+    align-items: center;
+  }
+
+  .q-tag {
+    font-family: 'Fira Code', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-weight: 500;
+  }
+
+  .tag-aws { background: rgba(232,83,10,0.1); color: #c2410c; border: 1px solid rgba(232,83,10,0.25); }
+  .tag-azure { background: rgba(0,120,212,0.1); color: #1d4ed8; border: 1px solid rgba(0,120,212,0.25); }
+  .tag-cloud { background: rgba(29,185,84,0.1); color: #15803d; border: 1px solid rgba(29,185,84,0.25); }
+  .tag-iam { background: rgba(124,58,237,0.1); color: #7c3aed; border: 1px solid rgba(124,58,237,0.25); }
+  .tag-networking { background: rgba(8,145,178,0.1); color: #0e7490; border: 1px solid rgba(8,145,178,0.25); }
+  .tag-cost { background: rgba(180,83,9,0.1); color: #92400e; border: 1px solid rgba(180,83,9,0.25); }
+
+  .diff-badge {
+    font-family: 'Fira Code', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .diff-easy { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .diff-medium { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+  .diff-hard { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+  .q-text {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .q-answer {
+    margin-top: 14px;
+    padding: 14px 16px;
+    background: #f8f6f0;
+    border-left: 3px solid var(--border);
+    font-family: 'Fira Code', monospace;
+    font-size: 11.5px;
+    line-height: 1.75;
+    color: #3d3530;
+    display: none;
+    animation: slideDown 0.25s ease;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .q-card.open .q-answer { display: block; }
+  .q-card[data-cat="aws"].open .q-answer { border-left-color: var(--accent-aws); }
+  .q-card[data-cat="azure"].open .q-answer { border-left-color: var(--accent-azure); }
+  .q-card[data-cat="cloud"].open .q-answer { border-left-color: var(--accent-cloud); }
+  .q-card[data-cat="iam"].open .q-answer { border-left-color: var(--accent-iam); }
+  .q-card[data-cat="networking"].open .q-answer { border-left-color: var(--accent-net); }
+  .q-card[data-cat="cost"].open .q-answer { border-left-color: var(--accent-cost); }
+
+  .q-footer {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .q-toggle {
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .toggle-chevron { transition: transform 0.25s; display: inline-block; }
+  .q-card.open .toggle-chevron { transform: rotate(180deg); }
+
+  .mark-btn {
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.18s;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .mark-btn:hover { border-color: #16a34a; color: #16a34a; }
+  .q-card.answered .mark-btn { border-color: #16a34a; color: #16a34a; background: #f0faf4; }
+
+  .no-results {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    display: none;
+  }
+
+  @keyframes riseUp {
+    from { opacity:0; transform: translateY(12px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+
+  @keyframes slideDown {
+    from { opacity:0; transform: translateY(-6px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 640px) {
+    .hero { grid-template-columns: 1fr; gap: 24px; padding: 40px 20px 30px; }
+    .hero-right { flex-direction: row; align-items: flex-start; }
+    .questions-container { grid-template-columns: 1fr; padding: 0 16px 60px; }
+    .controls-wrap, .progress-wrap { padding: 16px 20px; }
+    h1 { font-size: 64px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-left">
+    <div class="provider-pills">
+      <span class="pill pill-aws">Amazon AWS</span>
+      <span class="pill pill-azure">Microsoft Azure</span>
+      <span class="pill pill-cloud">Cloud Fundamentals</span>
+    </div>
+    <h1><span class="highlight-aws">CLOUD</span><br><span class="highlight-az">100</span><br>QUESTIONS</h1>
+    <p class="hero-sub">Big Data on the cloud — AWS services, Azure Data Platform, IAM, Networking, Cost Optimization, and cross-cloud architecture patterns.</p>
+  </div>
+  <div class="hero-right">
+    <div class="stat-block">
+      <div class="stat-num">100</div>
+      <div class="stat-label">Questions</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num" id="answered-count">0</div>
+      <div class="stat-label">Done</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num">6</div>
+      <div class="stat-label">Categories</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="controls-wrap">
+  <button class="filter-btn active" data-cat="all">All (100)</button>
+  <button class="filter-btn" data-cat="aws">AWS</button>
+  <button class="filter-btn" data-cat="azure">Azure</button>
+  <button class="filter-btn" data-cat="cloud">Cloud Core</button>
+  <button class="filter-btn" data-cat="iam">IAM & Security</button>
+  <button class="filter-btn" data-cat="networking">Networking</button>
+  <button class="filter-btn" data-cat="cost">Cost & Optimization</button>
+  <div class="spacer"></div>
+  <input class="search-input" type="text" id="searchInput" placeholder="Search questions...">
+  <button class="reset-btn" id="resetBtn">Reset</button>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-text" id="progress-label">0 / 100 completed</div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="progress-text" id="progress-pct">0%</div>
+</div>
+
+<div class="questions-container" id="questionsContainer">
+  <div class="no-results" id="noResults">No questions match your search.</div>
+</div>
+
+<script>
+const questions = [
+
+  // ══════════════════════════════════════════════════
+  // AWS (1–34)
+  // ══════════════════════════════════════════════════
+  { id:1, cat:"aws", diff:"easy", q:"What is Amazon S3 and how is it used as a Big Data store?", a:"S3 (Simple Storage Service) is AWS's object storage service offering 11 nines of durability. In Big Data, it acts as a data lake — store raw files (Parquet, ORC, JSON, CSV) in buckets. Integrated with EMR, Glue, Athena, Redshift Spectrum. S3 is the de facto cloud data lake foundation on AWS." },
+  { id:2, cat:"aws", diff:"easy", q:"What is Amazon EMR and what Big Data frameworks does it support?", a:"EMR (Elastic MapReduce) is a managed cluster platform that runs Apache Spark, Hadoop, Hive, Presto, HBase, Flink, and more on EC2. Supports autoscaling, spot instances for cost savings, and integrates natively with S3. EMR Serverless and EMR on EKS are modern deployment options eliminating cluster management." },
+  { id:3, cat:"aws", diff:"easy", q:"What is Amazon Redshift and how does it differ from a traditional database?", a:"Redshift is AWS's columnar, MPP (Massively Parallel Processing) data warehouse. Data is stored column-by-column across slices (compute nodes). Integrates with S3 via Redshift Spectrum (query data directly in S3). Differs from OLTP DBs: optimized for analytical queries, not transactions. Supports up to petabytes of data." },
+  { id:4, cat:"aws", diff:"medium", q:"Explain Redshift distribution styles and sort keys.", a:"Distribution styles: KEY (hash by column, collocates rows with same key for joins), ALL (copy small tables to all nodes), EVEN (round-robin, default — no join optimization), AUTO (Redshift chooses). Sort keys: COMPOUND (sorts by columns in order — good for range filters), INTERLEAVED (equal weight to all sort columns — good for multi-column filters but expensive to maintain)." },
+  { id:5, cat:"aws", diff:"medium", q:"What is AWS Glue and what role does it play in a data pipeline?", a:"Glue is a fully managed serverless ETL service. Key components: Glue Crawler (auto-discovers schema and updates Glue Data Catalog), Glue ETL (runs Spark jobs for transformations), Glue Data Catalog (central metadata repository used by Athena, EMR, Redshift). Glue Studio provides visual ETL job authoring." },
+  { id:6, cat:"aws", diff:"easy", q:"What is Amazon Athena and when would you use it?", a:"Athena is a serverless interactive query service that runs SQL on data in S3 using Presto/Trino under the hood. No infrastructure to manage; pay per query (per TB scanned). Use for: ad-hoc analysis on data lake, querying Parquet/ORC files, building lightweight analytics without a warehouse. Always partition and use columnar formats to reduce scan cost." },
+  { id:7, cat:"aws", diff:"medium", q:"What is Amazon Kinesis and what are its four services?", a:"Kinesis Data Streams: real-time data ingestion, configurable retention (1–365 days), manual shard management. Kinesis Data Firehose: fully managed delivery to S3/Redshift/Elasticsearch, auto-scaling, near-real-time. Kinesis Data Analytics: SQL or Apache Flink on streams. Kinesis Video Streams: ingest and process video streams." },
+  { id:8, cat:"aws", diff:"medium", q:"What is Amazon MSK (Managed Streaming for Kafka)?", a:"MSK is a fully managed Apache Kafka service on AWS. Handles broker provisioning, patching, monitoring, and failover. MSK Serverless auto-scales capacity. Integrates with Kinesis Data Firehose, Lambda, and EMR. Use MSK when you need Kafka's ecosystem (Kafka Connect, Kafka Streams) without self-managing brokers on EC2." },
+  { id:9, cat:"aws", diff:"medium", q:"What is AWS Lake Formation and how does it simplify data lake governance?", a:"Lake Formation provides a centralized permission model for data lakes built on S3 and Glue Data Catalog. Instead of managing S3 bucket policies per service, Lake Formation controls table/column-level access across Athena, EMR, Glue, and Redshift Spectrum via LF-Tags and fine-grained access controls. Handles data sharing across accounts." },
+  { id:10, cat:"aws", diff:"hard", q:"How does Amazon Redshift Spectrum work and when should you use it?", a:"Redshift Spectrum extends Redshift queries to data in S3 without loading it. Queries are split: local tables run on Redshift nodes, S3 parts run on Spectrum's independent compute layer (scales to 1000s of nodes). Best for: querying cold historical data in S3 that doesn't need to be in the warehouse, or joining hot warehouse data with cold lake data." },
+  { id:11, cat:"aws", diff:"medium", q:"What is AWS Step Functions and how is it used in data pipelines?", a:"Step Functions is a serverless workflow orchestrator using state machines defined in JSON/YAML (Amazon States Language). In data pipelines: chain Glue ETL jobs, Lambda functions, EMR steps, and Athena queries with error handling, retries, and parallel execution. Alternative to Airflow for AWS-native pipelines." },
+  { id:12, cat:"aws", diff:"medium", q:"What is the difference between S3 Standard, S3-IA, S3 Glacier, and S3 Glacier Deep Archive?", a:"Standard: frequent access, low latency, highest cost (~$0.023/GB). Standard-IA (Infrequent Access): lower storage cost, retrieval fee — for data accessed monthly. Glacier Instant Retrieval: archival with millisecond retrieval. Glacier Flexible: 1–12 hour retrieval. Glacier Deep Archive: cheapest ($0.00099/GB), 12–48 hour retrieval. Use lifecycle policies to transition data automatically." },
+  { id:13, cat:"aws", diff:"hard", q:"Explain how Amazon EMR handles spot instances for cost optimization.", a:"EMR supports mixed instance fleets with spot instances for task nodes (stateless workers) and on-demand for core nodes (HDFS data). Spot interruptions are handled by YARN's application master restarting tasks on other nodes. EMR Managed Scaling automatically adds/removes instances. For Spark, enable `spark.speculation` to rerun slow tasks elsewhere." },
+  { id:14, cat:"aws", diff:"medium", q:"What is AWS DynamoDB and how does it handle Big Data workloads?", a:"DynamoDB is a fully managed NoSQL key-value and document database. Handles Big Data via: auto-scaling, DAX (in-memory cache for microsecond reads), DynamoDB Streams (change data capture for downstream processing), Global Tables (multi-region active-active replication), and on-demand mode for unpredictable workloads. Not suited for complex analytical queries." },
+  { id:15, cat:"aws", diff:"medium", q:"What is Amazon QuickSight and how does it integrate with the AWS data stack?", a:"QuickSight is AWS's serverless BI/visualization service. SPICE (Super-fast, Parallel, In-memory Calculation Engine) caches data for fast dashboards. Integrates natively with Athena, Redshift, S3, RDS, and Glue Data Catalog. ML Insights provides anomaly detection and forecasting. Q feature allows natural language queries." },
+  { id:16, cat:"aws", diff:"hard", q:"How do you implement CDC (Change Data Capture) on AWS?", a:"Options: (1) AWS DMS (Database Migration Service) — captures changes from Oracle, MySQL, PostgreSQL, SQL Server and streams to S3, Kinesis, or Redshift. (2) DynamoDB Streams — capture item-level changes. (3) Kinesis Data Streams + Debezium on MSK for Kafka-based CDC. (4) AWS Glue supports incremental processing. DMS is the most managed option for relational source systems." },
+  { id:17, cat:"aws", diff:"medium", q:"What is Amazon S3 Select and how does it improve query performance?", a:"S3 Select pushes SQL filtering into the S3 storage layer, retrieving only the subset of data matching a condition — reducing data transferred to the application by up to 400x. Supports CSV, JSON, and Parquet. Athena and Redshift Spectrum both leverage similar pushdown optimizations internally. For direct use: AWS SDKs support `select_object_content`." },
+  { id:18, cat:"aws", diff:"medium", q:"What is AWS SageMaker and how does it connect to Big Data pipelines?", a:"SageMaker is AWS's ML platform. In Big Data pipelines: SageMaker Processing reads from S3 to preprocess data at scale, Training reads S3 datasets, Feature Store stores features computed from EMR/Glue pipelines, Pipelines orchestrates ML workflows. Integrates with EMR for Spark-based feature engineering and Glue for data prep." },
+  { id:19, cat:"aws", diff:"hard", q:"What is the difference between Amazon RDS, Aurora, and Redshift for data workloads?", a:"RDS: managed OLTP relational DB (MySQL, PostgreSQL, SQL Server). Good for transactional apps, not analytics. Aurora: cloud-native RDBMS with 5x MySQL / 3x PostgreSQL performance, serverless v2, Global Database. Still OLTP. Redshift: columnar MPP analytical warehouse — OLAP. For Big Data: use Redshift for analytics; Aurora for operational data that feeds into pipelines." },
+  { id:20, cat:"aws", diff:"medium", q:"What is AWS Glue Data Catalog and why is it important?", a:"Glue Data Catalog is a centralized metadata repository (compatible with Apache Hive Metastore). Stores table definitions, schemas, and partitions for data in S3. Used by: Athena, EMR (Spark/Hive), Redshift Spectrum, and Lake Formation — all share the same metadata without duplication. Acts as the single source of truth for your data lake's structure." },
+  { id:21, cat:"aws", diff:"hard", q:"What are AWS Lambda's limitations for Big Data processing?", a:"Lambda limitations for Big Data: 15-minute max execution timeout, 10GB max memory, 512MB–10GB ephemeral /tmp storage, 6MB synchronous payload limit, 250MB deployment package. Not suited for long-running batch jobs or large dataset processing. Use for: lightweight event-driven triggers, small transformations, orchestration glue. Use Glue/EMR/Athena for actual Big Data processing." },
+  { id:22, cat:"aws", diff:"medium", q:"What is Amazon OpenSearch Service (formerly Elasticsearch) used for in Big Data?", a:"OpenSearch (Elasticsearch fork) provides full-text search, log analytics (ELK stack), and time-series data analysis. In Big Data: ingest logs from Kinesis Firehose, search unstructured data in a data lake, power application search features, and analyze CloudWatch logs. Use for search + real-time analytics; not for structured BI queries." },
+  { id:23, cat:"aws", diff:"medium", q:"How do you optimize Athena query performance and cost?", a:"(1) Partition data by frequently filtered columns (date, region). (2) Use columnar formats (Parquet/ORC) — reduces bytes scanned. (3) Compress data (Snappy, ZSTD). (4) Use workgroups with data scan limits to control cost. (5) Cache query results (24-hour cache). (6) Avoid SELECT *. (7) Keep file sizes 128MB+ to avoid small-file overhead. (8) Use partition projection for large partition sets." },
+  { id:24, cat:"aws", diff:"hard", q:"What is the AWS Well-Architected Framework and which pillars apply to Big Data?", a:"Six pillars: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, Sustainability. For Big Data: Security (encrypt S3 data, Lake Formation access control), Reliability (S3 11-9s durability, EMR autoscaling), Performance (right instance types, Parquet format, caching), Cost (Spot instances, S3 tiering, Athena vs Redshift tradeoffs), Sustainability (right-size clusters, serverless options)." },
+  { id:25, cat:"aws", diff:"medium", q:"What is Amazon EventBridge and how does it trigger data pipelines?", a:"EventBridge is a serverless event bus connecting AWS services, SaaS apps, and custom events. Trigger pipelines on: S3 file uploads (triggers Glue/Lambda), schedule-based triggers (replacing CloudWatch Events), CDC events from DynamoDB Streams. Supports event routing with content-based filtering. Central event backbone for event-driven architectures." },
+  { id:26, cat:"aws", diff:"easy", q:"What is Amazon CloudWatch and how is it used for Big Data pipeline monitoring?", a:"CloudWatch provides metrics, logs, alarms, and dashboards. For data pipelines: monitor EMR cluster metrics (YARN memory, disk utilization), set alarms on Glue job failures, track Kinesis shard iterator age (consumer lag), monitor Redshift WLM queue depth, and use Logs Insights for log analysis. Central observability layer for AWS workloads." },
+  { id:27, cat:"aws", diff:"hard", q:"What is Amazon Redshift's Workload Management (WLM) and why does it matter?", a:"WLM manages query concurrency and memory allocation across queues. Define queues with memory % and concurrency slots. Short Query Acceleration (SQA) automatically routes quick queries to a dedicated queue. Auto WLM lets Redshift dynamically adjust memory and concurrency. Poorly configured WLM causes query queuing and OOM errors under concurrent load." },
+  { id:28, cat:"aws", diff:"medium", q:"What is AWS DataSync and when would you use it?", a:"DataSync is a managed data transfer service for moving large amounts of data between on-premises storage, S3, EFS, and FSx. Optimized network protocols (up to 10x faster than rsync). Use for: initial data lake migration, recurring transfers from on-prem to S3, and cross-region S3 replication at scale. Not for real-time streaming — use Kinesis for that." },
+  { id:29, cat:"aws", diff:"medium", q:"What is Amazon EMR Serverless and how does it differ from EMR on EC2?", a:"EMR Serverless removes cluster management — submit jobs, AWS automatically provisions and scales compute. No idle cluster costs. Trade-offs: cold start latency (pre-initialized workers mitigate this), less control over instance types, higher per-second cost vs optimized EC2 spot clusters. Best for: intermittent, variable workloads where cluster management overhead isn't warranted." },
+  { id:30, cat:"aws", diff:"hard", q:"How does S3 strong consistency work and what changed in December 2020?", a:"Before Dec 2020: S3 had eventual consistency for overwrite PUTs and DELETEs — reads after writes might return stale data. Since Dec 2020: S3 provides strong read-after-write consistency for all operations at no extra cost. This simplifies data lake pipelines — no need for read-after-write delays or conditional checks for new object visibility." },
+  { id:31, cat:"aws", diff:"medium", q:"What is AWS Glue DynamicFrame vs Spark DataFrame?", a:"DynamicFrame is Glue's extension of Spark DataFrame, designed for messy, schema-inconsistent data. Supports choice types (when a field has multiple types across records), `resolveChoice()` to handle schema conflicts, `toDF()` to convert to Spark DataFrame. Use DynamicFrame for initial data cleaning with inconsistent schemas; convert to DataFrame for complex transformations." },
+  { id:32, cat:"aws", diff:"medium", q:"What is Amazon Timestream and what is it used for?", a:"Timestream is a purpose-built time-series database on AWS. Optimized for IoT and operational data (metrics, telemetry). Automatically tiers data from in-memory (recent) to magnetic storage (older). Supports time-series SQL with built-in functions (interpolation, smoothing, rate-of-change). Use for: IoT sensor data, application metrics, trading data — not general-purpose analytics." },
+  { id:33, cat:"aws", diff:"hard", q:"What is the difference between SQS, SNS, and EventBridge for data pipeline integration?", a:"SQS: message queue, point-to-point, decouples producers/consumers, messages persist until consumed, good for work queues. SNS: pub/sub fan-out, pushes to multiple subscribers (Lambda, SQS, HTTP, email) simultaneously. EventBridge: event bus with routing rules, content filtering, schema registry, SaaS integration, and archive/replay. Use SQS for task queues, SNS for fan-out notifications, EventBridge for event-driven orchestration." },
+  { id:34, cat:"aws", diff:"medium", q:"What is Amazon Neptune and how is it used in Big Data graph analytics?", a:"Neptune is AWS's managed graph database supporting both Property Graph (Gremlin, openCypher) and RDF (SPARQL). Use cases: knowledge graphs, fraud detection (transaction networks), recommendation engines, social networks, and entity resolution. Integrates with SageMaker for graph ML. Not suited for tabular analytics — use Redshift/Athena for that." },
+
+  // ══════════════════════════════════════════════════
+  // AZURE (35–64)
+  // ══════════════════════════════════════════════════
+  { id:35, cat:"azure", diff:"easy", q:"What is Azure Data Lake Storage Gen2 (ADLS Gen2) and how is it structured?", a:"ADLS Gen2 combines Azure Blob Storage with a hierarchical namespace (HNS), enabling file system semantics (directories, atomic renames) needed for Big Data workloads. Supports ABFS (Azure Blob File System) protocol. Integrated with Azure Databricks, HDInsight, Synapse Analytics, and Data Factory. Tiering: Hot, Cool, Archive." },
+  { id:36, cat:"azure", diff:"easy", q:"What is Azure Synapse Analytics and what does it unify?", a:"Synapse Analytics is an integrated analytics platform combining: dedicated SQL pools (MPP warehouse, formerly SQL DW), serverless SQL pools (query ADLS with SQL on-demand), Apache Spark pools (fully managed Spark), and Data Explorer (time-series/log analytics). Linked Service connects to ADLS, Cosmos DB, Power BI. One workspace for warehouse + lake + Spark." },
+  { id:37, cat:"azure", diff:"medium", q:"What is Azure Data Factory (ADF) and how is it used for ETL pipelines?", a:"ADF is Azure's managed ETL/ELT orchestration service. Key concepts: Linked Services (connections to sources/sinks), Datasets (data structures), Activities (Copy, Data Flow, Notebook, Stored Procedure), Pipelines (orchestration), Triggers (schedule, event, tumbling window). Mapping Data Flows provide Spark-based visual transformations without code." },
+  { id:38, cat:"azure", diff:"medium", q:"What is Azure Databricks and how does it differ from open-source Spark?", a:"Azure Databricks is a managed Databricks/Spark platform on Azure, co-developed by Microsoft and Databricks. Adds: Unity Catalog (unified governance), Delta Lake, MLflow, photon engine, and native Azure AD integration. Differs from open-source: fully managed clusters, auto-scaling, collaborative notebooks, tight Azure integration (ADLS, ADF, Synapse). Available in Standard, Premium, Enterprise tiers." },
+  { id:39, cat:"azure", diff:"medium", q:"What is Azure Event Hubs and how does it compare to Kafka?", a:"Event Hubs is a fully managed event streaming service with a Kafka-compatible endpoint — existing Kafka producers/consumers work without code changes. Supports millions of events/second, auto-inflate for auto-scaling, and Capture (automatic archiving to ADLS/Blob). Partitions = shards. Simpler than self-managed Kafka; trade-off is less configurability." },
+  { id:40, cat:"azure", diff:"medium", q:"What is Azure Stream Analytics and what is it used for?", a:"Stream Analytics is a fully managed SQL-based stream processing service. Write SQL queries over Event Hubs, IoT Hub, or Blob Storage streams, with windowing functions (tumbling, hopping, sliding, session). Outputs to Azure SQL, Cosmos DB, ADLS, Power BI for live dashboards. Use for: IoT telemetry, real-time anomaly detection, live dashboards." },
+  { id:41, cat:"azure", diff:"easy", q:"What is Azure Cosmos DB and what consistency models does it offer?", a:"Cosmos DB is Microsoft's globally distributed, multi-model NoSQL database supporting SQL API, MongoDB, Cassandra, Gremlin, and Table APIs. Five consistency levels: Strong, Bounded Staleness, Session (default), Consistent Prefix, Eventual. Multi-region writes with 99.999% SLA. Used for operational data that feeds Big Data pipelines via Change Feed → Event Hubs → Synapse." },
+  { id:42, cat:"azure", diff:"hard", q:"Explain the Synapse dedicated SQL pool distribution types.", a:"Hash: distributes rows by a hash of a column — co-locates related data for efficient joins. Round-robin: distributes evenly — default, good for staging tables. Replicated: copies the entire table to each compute node — best for small dimension tables (<2GB). Choose hash on the most frequently joined column. Avoid skewed distribution keys." },
+  { id:43, cat:"azure", diff:"medium", q:"What is Delta Lake integration in Azure Databricks?", a:"Delta Lake is the default table format in Databricks. ADLS Gen2 stores Delta tables (Parquet files + transaction log). Azure Databricks supports: ACID transactions, time travel (query past versions), schema enforcement/evolution, MERGE (upsert), Auto-optimize (auto-compaction and auto-tuning of file sizes), and Unity Catalog for governance." },
+  { id:44, cat:"azure", diff:"medium", q:"What is Azure HDInsight and when would you use it over Databricks?", a:"HDInsight is a managed open-source analytics cluster (Hadoop, Spark, Kafka, HBase, Interactive Query/Hive). Use HDInsight: when you need specific open-source components (HBase, Storm, Kafka), or need full cluster control. Use Databricks: for Spark-first, collaborative analytics, Delta Lake, and MLOps. HDInsight is being de-emphasized in favor of Databricks and Synapse for new workloads." },
+  { id:45, cat:"azure", diff:"hard", q:"What is Azure Purview (Microsoft Purview) and how does it support data governance?", a:"Microsoft Purview provides: Data Map (scan and catalog data across Azure, AWS, on-prem), Data Catalog (business glossary, data discovery, lineage tracking), Data Estate Insights (analytics on data quality and usage), and Information Protection (classify and label sensitive data). Integrates with Synapse, ADF, and Azure Databricks for automatic lineage capture." },
+  { id:46, cat:"azure", diff:"medium", q:"What is the difference between Azure Blob Storage and ADLS Gen2?", a:"Blob Storage: flat namespace, ideal for unstructured data (images, backups, logs). ADLS Gen2: hierarchical namespace built on Blob — adds directory-level operations, atomic renames (critical for Spark commits), POSIX-like ACLs, and higher throughput for Big Data workloads. ADLS Gen2 is always preferred for data lake workloads; Blob for simple object storage." },
+  { id:47, cat:"azure", diff:"medium", q:"What is Azure Logic Apps vs Azure Data Factory for pipeline orchestration?", a:"ADF: purpose-built for data pipelines — ETL, data movement, Spark jobs. Rich data-specific connectors, Mapping Data Flows, integration runtime. Logic Apps: general-purpose workflow automation with 400+ connectors for SaaS apps, APIs, and services. Use ADF for data engineering; Logic Apps for business process automation and lightweight integrations." },
+  { id:48, cat:"azure", diff:"hard", q:"How does Synapse Analytics serverless SQL pool work and what are its limitations?", a:"Serverless SQL pool: on-demand SQL engine that queries ADLS Gen2 directly (no data loading). Uses OPENROWSET to read Parquet/CSV/JSON. Auto-scales compute; pay per TB scanned. Limitations: no DML (INSERT/UPDATE/DELETE) on external sources, limited query complexity vs dedicated pool, higher latency than dedicated pool, can't create tables in ADLS directly." },
+  { id:49, cat:"azure", diff:"medium", q:"What is Azure IoT Hub and how does it connect to Big Data analytics?", a:"IoT Hub is a managed service for bi-directional IoT device communication. Devices send telemetry → IoT Hub → routed to: Event Hubs (for stream processing), Blob Storage (for batch), Service Bus. Pipeline: IoT Hub → Stream Analytics (real-time alerts) → ADLS (raw data) → Databricks/Synapse (analytics) → Power BI (dashboards)." },
+  { id:50, cat:"azure", diff:"medium", q:"What is Azure Machine Learning and how does it integrate with Big Data pipelines?", a:"Azure ML provides: Compute clusters (Spark/CPU/GPU), Datasets (versioned data references to ADLS), Pipelines (ML workflow orchestration), Model Registry, Endpoints (managed inference), and MLflow integration. Data flows: ADF/Databricks processes data → registers as AML Dataset → training job reads from ADLS → model deployed to AKS/ACI endpoint." },
+  { id:51, cat:"azure", diff:"hard", q:"What is Azure Synapse Link and what problem does it solve?", a:"Synapse Link creates a near-real-time analytical replica of Cosmos DB or Dataverse data in Synapse Analytics — no ETL pipelines needed. Changes in Cosmos DB are automatically mirrored to ADLS in analytical (columnar) format. Enables HTAP (Hybrid Transactional/Analytical Processing): query operational Cosmos DB data with SQL or Spark without impacting transactional performance." },
+  { id:52, cat:"azure", diff:"medium", q:"What are Azure integration runtimes in Data Factory and when do you use each?", a:"Azure IR: cloud-hosted, connects to public cloud data stores and services — no setup needed. Self-hosted IR: installed on-premises or in a private network — connects to on-prem databases or private VNet resources. Azure-SSIS IR: runs SSIS packages in the cloud. Use Self-hosted IR for hybrid scenarios (on-prem SQL Server → ADLS Gen2)." },
+  { id:53, cat:"azure", diff:"medium", q:"What is the difference between Azure SQL Database and Azure SQL Managed Instance?", a:"Azure SQL Database: fully managed, PaaS, single database or elastic pool, hyperscale option up to 100TB. Limited SQL Server feature set. SQL Managed Instance: near 100% compatibility with on-prem SQL Server — CLR, SQL Agent, linked servers, cross-database queries. Use for lift-and-shift migrations. Both use vCore or DTU pricing models." },
+  { id:54, cat:"azure", diff:"hard", q:"How do you implement a real-time streaming pipeline on Azure end-to-end?", a:"Architecture: Devices/Apps → Event Hubs (ingestion, 1M events/sec) → Stream Analytics (windowed SQL processing, anomaly detection) OR Azure Databricks Structured Streaming (complex transformations, ML scoring) → ADLS Gen2 (raw + processed data in Delta) → Synapse/Power BI (dashboards). Use Event Hubs Capture for automatic raw data archival." },
+  { id:55, cat:"azure", diff:"medium", q:"What is Azure Cache for Redis and how is it used in data architectures?", a:"Azure Redis Cache provides in-memory key-value store for: session caching, real-time leaderboards, rate limiting, pub/sub messaging, and caching database query results. In Big Data: cache aggregated metrics queried by APIs, store streaming model predictions for fast retrieval, and implement a real-time feature store for ML serving." },
+  { id:56, cat:"azure", diff:"hard", q:"What is Azure Data Explorer (ADX) and when is it preferred over Synapse?", a:"ADX (Kusto) is purpose-built for high-performance analytics on large volumes of time-series, log, and telemetry data. Uses KQL (Kusto Query Language). Ingestion latency in seconds. Better than Synapse for: log analytics (billions of events), time-series queries, free-text search, and IoT scenarios. Synapse is better for structured, business analytics and SQL-familiar teams." },
+  { id:57, cat:"azure", diff:"medium", q:"What is Azure Service Bus vs Event Hubs vs Event Grid?", a:"Event Hubs: big data streaming ingestion, high throughput, ordered within partition, consumer groups. Service Bus: enterprise messaging, queues and topics, guaranteed ordering, dead-letter queues, sessions — for business transactions. Event Grid: event routing infrastructure, reacts to Azure resource events (Blob upload, resource state change), push to subscribers. Different tools for different messaging patterns." },
+  { id:58, cat:"azure", diff:"medium", q:"What is Azure Policy and how is it used for data governance in Big Data environments?", a:"Azure Policy enforces organizational standards and compliance across subscriptions. For data governance: enforce encryption at rest on storage accounts, require specific tags on data resources (owner, classification, retention), deny creation of public-endpoint storage, enforce approved VM sizes for Databricks clusters, and audit ADLS access logs. Integrated with Microsoft Purview for data compliance." },
+  { id:59, cat:"azure", diff:"hard", q:"What is Unity Catalog in Azure Databricks and what does it unify?", a:"Unity Catalog is a unified governance layer across all Databricks workspaces in an Azure account. Provides: fine-grained table, column, and row-level access control, data lineage (tracks data movement across notebooks and jobs), audit logs, and a 3-level namespace (catalog.schema.table). Eliminates workspace-level silos — one governance policy applied everywhere." },
+  { id:60, cat:"azure", diff:"medium", q:"How does Azure Monitor and Log Analytics differ from CloudWatch on AWS?", a:"Azure Monitor: umbrella service collecting metrics and logs from all Azure resources. Log Analytics Workspace: centralized repository for log data queried with KQL (Kusto). Application Insights: APM for application telemetry. AWS CloudWatch: similar umbrella (metrics + Logs + Logs Insights). Azure differentiator: KQL is more powerful than CloudWatch Logs Insights SQL; Azure Monitor Workbooks are richer than CloudWatch dashboards." },
+  { id:61, cat:"azure", diff:"easy", q:"What is Power BI and how does it connect to Azure data services?", a:"Power BI is Microsoft's BI/visualization platform. Direct connections to: Synapse Analytics (DirectQuery for real-time), Azure SQL, Databricks (JDBC connector), ADLS Gen2 (via Dataflows), Cosmos DB, and Azure Analysis Services (semantic models). Power BI Premium supports large datasets (up to 400GB), incremental refresh, and paginated reports." },
+  { id:62, cat:"azure", diff:"hard", q:"What is the Medallion architecture as implemented in Azure Databricks + ADLS Gen2?", a:"Bronze layer: raw ingested data in ADLS Gen2 (Event Hubs Capture, ADF Copy). Silver layer: cleansed, validated Delta tables (Databricks notebooks remove duplicates, fix types). Gold layer: aggregated, business-ready Delta tables served via Synapse serverless SQL or Databricks SQL. Each layer is a separate ADLS container with fine-grained Lake Formation/Unity Catalog permissions." },
+  { id:63, cat:"azure", diff:"medium", q:"What is Azure Managed Grafana and how is it used in Big Data monitoring?", a:"Azure Managed Grafana is a fully managed Grafana service integrated with Azure AD and Azure data sources (Azure Monitor, Prometheus, Log Analytics, Azure Data Explorer). Use for: real-time cluster metrics dashboards (Databricks, HDInsight), pipeline health monitoring, SLA tracking, and custom alerting. Eliminates self-hosting Grafana on VMs." },
+  { id:64, cat:"azure", diff:"medium", q:"What is the role of Azure Key Vault in a Big Data architecture?", a:"Key Vault centralizes secrets management: store database passwords, API keys, storage access keys, and TLS certificates. In Big Data: Databricks Secret Scopes back-ended by Key Vault (no hardcoded credentials in notebooks), ADF references Key Vault for Linked Service credentials, ADLS encryption uses Key Vault-managed customer keys (CMK). Provides audit logs of all secret access." },
+
+  // ══════════════════════════════════════════════════
+  // CLOUD CORE (65–75)
+  // ══════════════════════════════════════════════════
+  { id:65, cat:"cloud", diff:"easy", q:"What are the three cloud service models: IaaS, PaaS, and SaaS?", a:"IaaS (Infrastructure as a Service): raw compute, storage, networking — you manage OS and above (EC2, Azure VMs). PaaS (Platform as a Service): managed runtime, middleware, databases — you manage applications and data (EMR, ADF, Azure App Service). SaaS (Software as a Service): complete applications managed by provider (Snowflake, Databricks, Salesforce). Big Data trend: moving from IaaS to PaaS/SaaS to reduce ops burden." },
+  { id:66, cat:"cloud", diff:"medium", q:"What is the shared responsibility model in cloud security?", a:"Cloud provider is responsible for security OF the cloud (physical hardware, hypervisor, network infrastructure, managed service patching). Customer is responsible for security IN the cloud (data encryption, IAM configuration, application security, OS patching on IaaS, network ACLs). Misconception: cloud is not automatically secure — customer still owns data governance, access control, and compliance." },
+  { id:67, cat:"cloud", diff:"medium", q:"What is multi-cloud vs hybrid cloud and what are the trade-offs?", a:"Multi-cloud: use multiple public cloud providers (AWS + Azure + GCP). Avoids vendor lock-in, leverage best-of-breed services, geo compliance. Trade-offs: increased complexity, data transfer costs, inconsistent tooling. Hybrid cloud: on-premises + public cloud. Trade-offs: network latency, governance complexity, requires VPN/ExpressRoute/Direct Connect. Most enterprises use hybrid first, then selectively multi-cloud." },
+  { id:68, cat:"cloud", diff:"hard", q:"What is cloud-native data architecture and how does it differ from on-premises?", a:"Cloud-native: decoupled storage/compute (S3/ADLS as persistent store, Spark clusters ephemeral), pay-per-use, auto-scaling, managed services replace self-managed clusters, object storage as the hub. On-premises: coupled storage/compute (HDFS requires always-on clusters), CapEx model, manual scaling, requires Hadoop ops expertise. Cloud enables: serverless ETL, elastic scaling, near-zero idle cost." },
+  { id:69, cat:"cloud", diff:"medium", q:"What is Object Storage and how does it differ from block and file storage?", a:"Object storage (S3, ADLS, GCS): stores data as objects with unique IDs and metadata. No directory hierarchy natively. Massively scalable, cheap, REST API access. Not good for random writes. Block storage (EBS, Azure Disk): raw volumes for databases/OS, low latency, random I/O. File storage (EFS, Azure Files): shared file system (NFS/SMB). Big Data uses object storage as the data lake backbone." },
+  { id:70, cat:"cloud", diff:"medium", q:"What is cloud data residency and sovereignty and why does it matter for Big Data?", a:"Data residency: data stored in a specific geographic region (GDPR requires EU citizen data in EU). Data sovereignty: data subject to laws of country where stored. For Big Data: choose cloud regions that comply with regulations, use region-locking features (S3 Block Public Access + region restriction, Azure Policy region deny), implement data classification to identify regulated data." },
+  { id:71, cat:"cloud", diff:"hard", q:"What is FinOps and how does it apply to Big Data cloud workloads?", a:"FinOps is the practice of bringing financial accountability to cloud spending. For Big Data: right-size compute (Spot/Spot vs on-demand), auto-terminate idle clusters, use serverless (Athena, Glue) for intermittent workloads, monitor cost per pipeline/team via tagging, set budgets and alerts, use reserved instances for steady-state Redshift/Synapse pools, and measure cost per TB processed." },
+  { id:72, cat:"cloud", diff:"medium", q:"What is a VPC (Virtual Private Cloud) and why is it important for Big Data?", a:"VPC is a logically isolated network in the cloud where you control IP ranges, subnets, routing, and gateways. For Big Data: place EMR/Databricks clusters in private subnets (no public internet), use VPC endpoints for S3/ADLS (traffic stays on AWS/Azure backbone, no data egress charges), enable VPC Flow Logs for security auditing. Never expose data cluster nodes to the public internet." },
+  { id:73, cat:"cloud", diff:"medium", q:"What is cloud data compression and which algorithms are used in Big Data?", a:"Compression reduces storage and transfer costs. Common algorithms: Snappy (fast compression/decompression, moderate ratio — default in Spark), GZIP (higher ratio, slower — good for cold archival), Zstandard/ZSTD (best ratio+speed balance — recommended for Parquet in 2024), LZ4 (fastest, lowest ratio). Columnar formats (Parquet/ORC) apply column-level compression for higher effectiveness." },
+  { id:74, cat:"cloud", diff:"hard", q:"What is cloud-native observability and what three pillars does it cover?", a:"Three pillars: Metrics (numerical time-series measurements — CPU, memory, query latency; tools: CloudWatch, Azure Monitor, Prometheus), Logs (structured/unstructured event records — errors, audit trails; tools: CloudWatch Logs, Log Analytics, ELK), Traces (distributed request tracing across services; tools: AWS X-Ray, Azure Application Insights, Jaeger). Big Data also adds: pipeline data quality metrics (4th pillar)." },
+  { id:75, cat:"cloud", diff:"medium", q:"What is Infrastructure as Code (IaC) and why is it important for Big Data environments?", a:"IaC manages cloud resources via code (Terraform, Pulumi, AWS CloudFormation, Azure Bicep/ARM). Importance for Big Data: reproducible environments (dev/staging/prod parity), version-controlled infrastructure, automated cluster provisioning, disaster recovery via re-apply, drift detection. Best practice: manage EMR clusters, Glue jobs, Kinesis streams, Databricks workspaces all as code." },
+
+  // ══════════════════════════════════════════════════
+  // IAM & SECURITY (76–83)
+  // ══════════════════════════════════════════════════
+  { id:76, cat:"iam", diff:"easy", q:"What is IAM (Identity and Access Management) and what are the core concepts in AWS?", a:"AWS IAM manages who can do what on which resources. Core concepts: Users (human identities), Groups (collections of users), Roles (assumed by services/applications — no long-term credentials), Policies (JSON documents defining Allow/Deny actions on resources), ARN (Amazon Resource Name — unique identifier for any AWS resource). Principle of least privilege: grant minimum permissions needed." },
+  { id:77, cat:"iam", diff:"medium", q:"What is the difference between IAM roles and IAM users in AWS?", a:"IAM Users: long-term credentials (access key + secret), associated with a person or application. IAM Roles: temporary credentials via STS AssumeRole, no static credentials. Best practices: never use root account, use roles for EC2/Lambda/EMR (instance profile), use roles for cross-account access, enable MFA on all users, rotate access keys regularly. Prefer roles over users for programmatic access." },
+  { id:78, cat:"iam", diff:"medium", q:"What is Azure RBAC (Role-Based Access Control) and how is it structured?", a:"Azure RBAC controls access to Azure resources. Structure: Security Principal (user, group, service principal, managed identity) + Role Definition (set of permissions: Owner, Contributor, Reader, or custom) + Scope (management group, subscription, resource group, or resource). Assignment: principal gets role at scope. For data: use built-in roles (Storage Blob Data Reader/Contributor, Synapse SQL Administrator)." },
+  { id:79, cat:"iam", diff:"hard", q:"What is AWS Lake Formation fine-grained access control?", a:"Lake Formation provides column-level, row-level, and cell-level security on Glue Data Catalog tables. Tag-based access control (LF-Tags) assigns tags to columns/tables and grants access to principals with matching tags. This replaces managing complex S3 bucket policies and IAM policies per table. Access enforced transparently across Athena, Redshift Spectrum, and EMR." },
+  { id:80, cat:"iam", diff:"medium", q:"What is Azure Managed Identity and why is it preferred over service principals?", a:"Managed Identity provides an automatically managed identity for Azure services — no credential management, no secrets to rotate or store. System-assigned: tied to one resource's lifecycle. User-assigned: standalone identity reusable across multiple resources. Use managed identity for: ADF accessing ADLS, Databricks accessing Key Vault, Azure ML accessing storage. Eliminates credentials in code/config." },
+  { id:81, cat:"iam", diff:"hard", q:"What is encryption at rest vs encryption in transit for Big Data on cloud?", a:"At rest: data stored encrypted on disk/object storage. AWS: S3-SSE (SSE-S3 managed keys, SSE-KMS customer-managed, SSE-C customer-provided). Azure: Azure Storage Service Encryption with AES-256 (Microsoft-managed or CMK via Key Vault). In transit: TLS 1.2+ for all data movement. For Big Data: enforce `s3:SecureTransport` S3 bucket policy, enable HTTPS-only on ADLS, use TLS for Kafka/Kinesis consumers." },
+  { id:82, cat:"iam", diff:"medium", q:"What is AWS KMS (Key Management Service) and how is it used in data pipelines?", a:"KMS manages cryptographic keys for encrypting/decrypting data. CMK (Customer Managed Key): you control key rotation and access policies. AWS Managed Key: AWS manages rotation. In pipelines: S3 server-side encryption with KMS, Redshift cluster encryption, Glue job encryption, RDS encryption. Key Policy controls who can use or manage the key — separate from IAM policies." },
+  { id:83, cat:"iam", diff:"hard", q:"What is zero-trust security architecture and how does it apply to cloud Big Data?", a:"Zero-trust: never trust, always verify — no implicit trust based on network location. For Big Data: authenticate every request (no trusted internal networks), implement micro-segmentation (Databricks in private subnet, S3 endpoint only), enforce MFA + conditional access, encrypt all data in transit and at rest, continuous monitoring and audit logging, just-in-time access for sensitive data (Privileged Identity Management in Azure)." },
+
+  // ══════════════════════════════════════════════════
+  // NETWORKING (84–90)
+  // ══════════════════════════════════════════════════
+  { id:84, cat:"networking", diff:"medium", q:"What is a VPC Endpoint (AWS) / Private Endpoint (Azure) and why is it critical for data architectures?", a:"VPC Endpoint (AWS) / Private Endpoint (Azure): connects VPC/VNet to cloud services (S3, ADLS) privately over the AWS/Azure backbone — no traffic traverses the public internet. Benefits: eliminates data egress charges for S3/ADLS traffic, removes internet gateway requirement, reduces attack surface. Essential for security-compliant Big Data architectures." },
+  { id:85, cat:"networking", diff:"medium", q:"What is AWS Direct Connect vs Azure ExpressRoute?", a:"Both provide dedicated private network connections from on-premises to the cloud — not over the public internet. Benefits: consistent low latency, higher bandwidth (up to 100Gbps), lower data transfer costs vs internet. Direct Connect (AWS): connect via partner locations. ExpressRoute (Azure): similar model with providers like Equinix. Use for: hybrid cloud, high-volume data replication from on-prem to cloud." },
+  { id:86, cat:"networking", diff:"medium", q:"What is VPC Peering and Transit Gateway in AWS?", a:"VPC Peering: direct network connection between two VPCs — no transitive routing (A↔B and B↔C doesn't mean A↔C). Transit Gateway: centralized network hub connecting multiple VPCs and on-premises — supports transitive routing. For Big Data: use Transit Gateway when multiple team VPCs need to share a centralized data lake VPC — simpler than managing many peering connections." },
+  { id:87, cat:"networking", diff:"hard", q:"What is Azure Virtual Network Service Endpoint vs Private Endpoint?", a:"Service Endpoint: extends VNet identity to Azure services — traffic stays on Azure backbone, service sees VNet as source, but service still has public IP. Private Endpoint: assigns a private IP from your VNet to the service (ADLS, Synapse, Key Vault) — service is fully private, no public IP exposed. Private Endpoint is the more secure and recommended option for production data workloads." },
+  { id:88, cat:"networking", diff:"medium", q:"What is data egress cost and how do you minimize it in cloud architectures?", a:"Egress: transferring data out of a cloud region to the internet or another region incurs per-GB fees (AWS: ~$0.09/GB out to internet). Minimization strategies: process data in-region (keep compute near storage), use VPC Endpoints (S3/ADLS intra-region traffic is free), architect for data gravity (store data where it's consumed), use Content Delivery Networks for distribution, avoid cross-region data transfers in hot paths." },
+  { id:89, cat:"networking", diff:"hard", q:"What is PrivateLink in AWS and how does it enable secure SaaS integration?", a:"AWS PrivateLink exposes services privately over the AWS network without requiring VPC peering or internet gateway. Service providers (Databricks, Snowflake, SaaS vendors) can expose endpoints via PrivateLink; consumers connect via Interface VPC Endpoint in their VPC. Data never leaves the AWS network. Used for: connecting to managed Databricks control plane, Snowflake, and third-party data services securely." },
+  { id:90, cat:"networking", diff:"medium", q:"What are Availability Zones (AZs) and Regions and why do they matter for Big Data reliability?", a:"Regions: geographic areas (us-east-1, eu-west-1) with independent infrastructure. Each region has 2–6 Availability Zones — physically separate data centers with independent power, cooling, and networking. For Big Data reliability: deploy EMR master + core nodes across AZs, use S3/ADLS (automatically multi-AZ), replicate Redshift to another region for DR, set up MSK brokers across 3 AZs for Kafka HA." },
+
+  // ══════════════════════════════════════════════════
+  // COST & OPTIMIZATION (91–100)
+  // ══════════════════════════════════════════════════
+  { id:91, cat:"cost", diff:"medium", q:"What are EC2 Spot Instances (AWS) and Azure Spot VMs and how do they reduce Big Data costs?", a:"Spot/Spot VMs offer unused cloud capacity at 60–90% discount vs on-demand pricing, but can be interrupted with 2-minute (AWS) or 30-second (Azure) notice. Best for: stateless Spark task nodes (YARN restarts interrupted tasks), EMR Spot-aware instance fleets, batch processing with checkpointing. Use on-demand for master/driver nodes. Can save $50K+/year on large EMR clusters." },
+  { id:92, cat:"cost", diff:"medium", q:"What is Reserved Instances (AWS) vs Savings Plans and when should you use them?", a:"Reserved Instances (RIs): commit to specific instance type/region for 1–3 years; 40–75% savings. Convertible RIs: can change instance family. Savings Plans: more flexible — commit to $/hour spend (Compute Savings Plans apply to any EC2, Fargate, Lambda). For Big Data: buy 1-year Savings Plans for steady-state Redshift nodes and EMR on-demand baseline; use Spot for burst capacity." },
+  { id:93, cat:"cost", diff:"hard", q:"How do you perform cloud cost allocation for Big Data workloads across teams?", a:"Tag all resources (team, project, environment, pipeline) — enforce via AWS Config/Azure Policy. Use AWS Cost Explorer or Azure Cost Management to break down costs by tags. For shared resources (Redshift, EMR): implement chargeback via query-level cost attribution (Redshift cost per WLM queue) or time-based allocation. Use Databricks' job-level billing attribution in Unity Catalog." },
+  { id:94, cat:"cost", diff:"medium", q:"What is S3 Intelligent-Tiering and when is it useful?", a:"S3 Intelligent-Tiering automatically moves objects between access tiers (Frequent, Infrequent, Archive Instant, Archive) based on access patterns — no retrieval fees for monitored tiers. Small monitoring fee per object ($0.0025/1000 objects). Useful when access patterns are unknown or change over time — e.g., raw data lake where some historical data is occasionally needed. Not worth it for objects <128KB." },
+  { id:95, cat:"cost", diff:"hard", q:"How do you right-size Spark clusters for cost efficiency?", a:"(1) Start small, measure: submit a sample job, check Spark UI for CPU/memory utilization. (2) Target 70–80% memory utilization — oversized clusters waste money. (3) Choose instance families: memory-optimized (r5/r6g) for Spark, compute-optimized (c5) for CPU-bound ML. (4) Enable autoscaling — scale out during peak, back in during idle. (5) Use Spot for task nodes. (6) Set cluster auto-termination (idle timeout)." },
+  { id:96, cat:"cost", diff:"medium", q:"What is Redshift Pause and Resume and how does it reduce costs?", a:"Redshift Serverless or Pause/Resume for provisioned clusters stops billing for compute when the cluster is paused (storage still billed). Use for: dev/test clusters paused nights/weekends (save 70%), analytics clusters paused during business holidays. Automate with AWS Lambda + CloudWatch Events. Resume takes 1–3 minutes. Alternative: Redshift Serverless with auto-pause for true pay-per-query." },
+  { id:97, cat:"cost", diff:"hard", q:"What is query cost estimation in BigQuery and how does it differ from Redshift?", a:"BigQuery: charges per byte scanned (on-demand: $6.25/TB, with CDW: flat rate). Always preview cost with `--dry_run` before running. Use slot reservations for predictable spend. Redshift: pay for cluster compute (hourly) regardless of queries run — idle clusters still cost money. BigQuery favors bursty, ad-hoc analytics (pay for what you use); Redshift/Synapse dedicated pools favor consistent, high-concurrency workloads." },
+  { id:98, cat:"cost", diff:"medium", q:"What is Azure Cost Management + Billing and what are its key features?", a:"Azure Cost Management provides: cost analysis (breakdown by service, resource group, tag), budgets (alerts when spending exceeds threshold), cost alerts, recommendations (right-sizing, reserved instance opportunities), and exports to Storage Account. For Big Data: track Databricks DBU consumption, Synapse DWU cost, ADLS capacity and operations, and ADF activity runs. Use tags to attribute costs to teams and projects." },
+  { id:99, cat:"cost", diff:"hard", q:"How do you calculate and optimize the Total Cost of Ownership (TCO) for migrating on-prem Hadoop to cloud?", a:"TCO comparison: On-prem (hardware refresh, DC costs, power, cooling, Hadoop ops FTEs, software licenses) vs Cloud (compute + storage + data transfer + managed service fees). Cloud typically wins at scale: EMR eliminates Hadoop ops, S3 is 80% cheaper than HDFS, auto-scaling eliminates over-provisioning. Use AWS TCO Calculator / Azure Migrate for estimates. Factor in: training costs, migration effort, and ongoing optimization." },
+  { id:100, cat:"cost", diff:"hard", q:"What is FinOps maturity model and how do you apply it to a Big Data platform team?", a:"FinOps Crawl: basic tagging, cost visibility dashboards, budget alerts. Walk: chargeback to teams, anomaly detection, rightsizing recommendations actioned. Run: real-time cost attribution per job/query, automated optimization (auto-terminate clusters, intelligent tiering), unit economics (cost per TB processed, cost per ML training run). Apply to Big Data: integrate cost metrics into pipeline CI/CD, fail pipelines exceeding cost budgets, publish cost leaderboards per team." }
+];
+
+let activeFilter = 'all';
+let answered = new Set(JSON.parse(localStorage.getItem('cloud_answered') || '[]'));
+let openCards = new Set();
+
+function saveAnswered() {
+  localStorage.setItem('cloud_answered', JSON.stringify([...answered]));
+}
+
+function updateProgress() {
+  const total = questions.length;
+  const done = answered.size;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('answered-count').textContent = done;
+  document.getElementById('progress-label').textContent = `${done} / ${total} completed`;
+  document.getElementById('progress-pct').textContent = `${pct}%`;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function renderQuestions(filtered) {
+  const container = document.getElementById('questionsContainer');
+  [...container.querySelectorAll('.q-card')].forEach(el => el.remove());
+  const noResults = document.getElementById('noResults');
+
+  if (filtered.length === 0) { noResults.style.display = 'block'; return; }
+  noResults.style.display = 'none';
+
+  filtered.forEach((q, idx) => {
+    const card = document.createElement('div');
+    card.className = 'q-card' + (answered.has(q.id) ? ' answered' : '') + (openCards.has(q.id) ? ' open' : '');
+    card.dataset.cat = q.cat;
+    card.dataset.id = q.id;
+    card.style.animationDelay = Math.min(idx * 0.025, 0.5) + 's';
+
+    const catLabel = { aws:'AWS', azure:'Azure', cloud:'Cloud Core', iam:'IAM & Security', networking:'Networking', cost:'Cost & Optimization' }[q.cat] || q.cat;
+
+    card.innerHTML = `
+      <div class="q-top">
+        <div class="q-num">#${String(q.id).padStart(3,'0')}</div>
+        <div class="q-body">
+          <div class="q-meta">
+            <span class="q-tag tag-${q.cat}">${catLabel}</span>
+            <span class="diff-badge diff-${q.diff}">${q.diff}</span>
+          </div>
+          <div class="q-text">${q.q}</div>
+        </div>
+      </div>
+      <div class="q-answer">${q.a}</div>
+      <div class="q-footer">
+        <div class="q-toggle"><span class="toggle-chevron">▼</span> <span class="toggle-txt">${openCards.has(q.id) ? 'hide answer' : 'show answer'}</span></div>
+        <button class="mark-btn" data-id="${q.id}">${answered.has(q.id) ? '✓ done' : '○ mark done'}</button>
+      </div>
+    `;
+
+    card.addEventListener('click', (e) => {
+      if (e.target.classList.contains('mark-btn')) return;
+      if (openCards.has(q.id)) {
+        openCards.delete(q.id);
+        card.classList.remove('open');
+        card.querySelector('.toggle-txt').textContent = 'show answer';
+      } else {
+        openCards.add(q.id);
+        card.classList.add('open');
+        card.querySelector('.toggle-txt').textContent = 'hide answer';
+      }
+    });
+
+    card.querySelector('.mark-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (answered.has(q.id)) {
+        answered.delete(q.id);
+        card.classList.remove('answered');
+        e.target.textContent = '○ mark done';
+      } else {
+        answered.add(q.id);
+        card.classList.add('answered');
+        e.target.textContent = '✓ done';
+      }
+      saveAnswered();
+      updateProgress();
+    });
+
+    container.appendChild(card);
+  });
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = questions.filter(q => {
+    const matchCat = activeFilter === 'all' || q.cat === activeFilter;
+    const matchSearch = !search || q.q.toLowerCase().includes(search) || q.a.toLowerCase().includes(search);
+    return matchCat && matchSearch;
+  });
+  renderQuestions(filtered);
+}
+
+document.querySelectorAll('.filter-btn[data-cat]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn[data-cat]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.cat;
+    applyFilters();
+  });
+});
+
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (confirm('Reset all progress?')) {
+    answered.clear(); openCards.clear();
+    localStorage.removeItem('cloud_answered');
+    updateProgress(); applyFilters();
+  }
+});
+
+updateProgress();
+applyFilters();
+</script>
+</body>
+</html>

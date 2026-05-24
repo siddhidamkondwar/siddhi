@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Big Data — 100 Questions</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --card: #161a22;
+    --border: #1e2330;
+    --accent1: #00e5ff;
+    --accent2: #ff4d6d;
+    --accent3: #a78bfa;
+    --accent4: #34d399;
+    --accent5: #fbbf24;
+    --text: #e8ecf4;
+    --muted: #6b7280;
+    --tag-py: #3b82f6;
+    --tag-sql: #10b981;
+    --tag-arch: #f59e0b;
+    --tag-core: #8b5cf6;
+    --tag-tools: #ef4444;
+    --tag-opt: #06b6d4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Instrument Serif', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .hero {
+    position: relative;
+    padding: 80px 40px 60px;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -120px; left: 50%; transform: translateX(-50%);
+    width: 700px; height: 400px;
+    background: radial-gradient(ellipse, rgba(0,229,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--accent1);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    opacity: 0.8;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #fff 30%, var(--accent1) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+
+  .hero-sub {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 20px;
+    color: var(--muted);
+    margin-bottom: 40px;
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 36px;
+    color: var(--accent1);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* Controls */
+  .controls {
+    position: relative;
+    z-index: 10;
+    max-width: 900px;
+    margin: 0 auto 50px;
+    padding: 0 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .filter-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .filter-btn:hover { border-color: var(--accent1); color: var(--accent1); }
+  .filter-btn.active { background: var(--accent1); color: #000; border-color: var(--accent1); font-weight: 600; }
+  .filter-btn[data-cat="python"].active { background: var(--tag-py); border-color: var(--tag-py); }
+  .filter-btn[data-cat="sql"].active { background: var(--tag-sql); border-color: var(--tag-sql); }
+  .filter-btn[data-cat="architecture"].active { background: var(--tag-arch); border-color: var(--tag-arch); color: #000; }
+  .filter-btn[data-cat="core"].active { background: var(--tag-core); border-color: var(--tag-core); }
+  .filter-btn[data-cat="tools"].active { background: var(--tag-tools); border-color: var(--tag-tools); }
+  .filter-btn[data-cat="optimization"].active { background: var(--tag-opt); border-color: var(--tag-opt); color: #000; }
+
+  /* Search */
+  .search-wrap {
+    position: relative;
+    z-index: 10;
+    max-width: 520px;
+    margin: 0 auto 40px;
+    padding: 0 24px;
+  }
+
+  .search-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 12px 16px 12px 40px;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-input:focus { border-color: var(--accent1); }
+  .search-input::placeholder { color: var(--muted); }
+
+  .search-icon {
+    position: absolute;
+    left: 38px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  /* Progress */
+  .progress-bar-wrap {
+    max-width: 900px;
+    margin: 0 auto 40px;
+    padding: 0 24px;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent1), var(--accent3));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* Questions Grid */
+  .questions-container {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+    gap: 16px;
+  }
+
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 24px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .q-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 12px 0 0 12px;
+  }
+
+  .q-card[data-cat="python"]::before { background: var(--tag-py); }
+  .q-card[data-cat="sql"]::before { background: var(--tag-sql); }
+  .q-card[data-cat="architecture"]::before { background: var(--tag-arch); }
+  .q-card[data-cat="core"]::before { background: var(--tag-core); }
+  .q-card[data-cat="tools"]::before { background: var(--tag-tools); }
+  .q-card[data-cat="optimization"]::before { background: var(--tag-opt); }
+
+  .q-card:hover {
+    border-color: rgba(0,229,255,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,229,255,0.08);
+  }
+
+  .q-card.answered {
+    border-color: rgba(52,211,153,0.3);
+    background: rgba(52,211,153,0.04);
+  }
+
+  .q-card.answered::after {
+    content: '✓';
+    position: absolute;
+    top: 18px; right: 18px;
+    color: var(--accent4);
+    font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .q-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+
+  .q-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    flex-shrink: 0;
+    margin-top: 2px;
+    min-width: 28px;
+  }
+
+  .q-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+
+  .q-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  .tag-python { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+  .tag-sql { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+  .tag-architecture { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+  .tag-core { background: rgba(139,92,246,0.15); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.3); }
+  .tag-tools { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+  .tag-optimization { background: rgba(6,182,212,0.15); color: #67e8f9; border: 1px solid rgba(6,182,212,0.3); }
+
+  .diff-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.08em;
+  }
+
+  .diff-easy { background: rgba(52,211,153,0.1); color: #6ee7b7; border: 1px solid rgba(52,211,153,0.2); }
+  .diff-medium { background: rgba(251,191,36,0.1); color: #fcd34d; border: 1px solid rgba(251,191,36,0.2); }
+  .diff-hard { background: rgba(239,68,68,0.1); color: #fca5a5; border: 1px solid rgba(239,68,68,0.2); }
+
+  .q-text {
+    font-family: 'Instrument Serif', serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .q-answer {
+    margin-top: 14px;
+    padding: 14px 16px;
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.1);
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #a5b4fc;
+    display: none;
+    animation: slideDown 0.3s ease;
+  }
+
+  .q-card.open .q-answer { display: block; }
+
+  .q-toggle {
+    margin-top: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .q-toggle-icon { transition: transform 0.3s; display: inline-block; }
+  .q-card.open .q-toggle-icon { transform: rotate(180deg); }
+
+  .mark-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    padding: 5px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.1em;
+  }
+
+  .mark-btn:hover { border-color: var(--accent4); color: var(--accent4); }
+  .q-card.answered .mark-btn { border-color: var(--accent4); color: var(--accent4); }
+
+  .no-results {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    display: none;
+  }
+
+  /* Section dividers */
+  .section-header {
+    grid-column: 1/-1;
+    padding: 8px 0 4px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  .glow-orb {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(80px);
+    opacity: 0.07;
+    z-index: 0;
+  }
+  .orb1 { width: 500px; height: 500px; background: var(--accent1); top: -100px; right: -100px; }
+  .orb2 { width: 400px; height: 400px; background: var(--accent3); bottom: 100px; left: -100px; }
+
+  .reset-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--accent2);
+    background: transparent;
+    color: var(--accent2);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .reset-btn:hover { background: var(--accent2); color: #fff; }
+
+  @media (max-width: 600px) {
+    .questions-container { grid-template-columns: 1fr; padding: 0 12px 60px; }
+    h1 { font-size: 44px; }
+    .hero { padding: 50px 20px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow-orb orb1"></div>
+<div class="glow-orb orb2"></div>
+
+<div class="hero">
+  <div class="hero-label">// interview prep · reference guide</div>
+  <h1>Big Data<br>100 Qs</h1>
+  <p class="hero-sub">Python · SQL · Architecture · Core Concepts · Tools · Optimization</p>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-num">100</div><div class="stat-label">Questions</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">Categories</div></div>
+    <div class="stat"><div class="stat-num" id="answered-count">0</div><div class="stat-label">Answered</div></div>
+  </div>
+</div>
+
+<div class="search-wrap">
+  <span class="search-icon">⌕</span>
+  <input class="search-input" type="text" id="searchInput" placeholder="Search questions...">
+</div>
+
+<div class="controls">
+  <button class="filter-btn active" data-cat="all">All (100)</button>
+  <button class="filter-btn" data-cat="core">Core Concepts</button>
+  <button class="filter-btn" data-cat="python">Python</button>
+  <button class="filter-btn" data-cat="sql">SQL</button>
+  <button class="filter-btn" data-cat="architecture">Architecture</button>
+  <button class="filter-btn" data-cat="tools">Tools & Ecosystem</button>
+  <button class="filter-btn" data-cat="optimization">Optimization</button>
+  <button class="reset-btn" id="resetBtn">Reset Progress</button>
+</div>
+
+<div class="progress-bar-wrap">
+  <div class="progress-info">
+    <span id="progress-label">0 / 100 completed</span>
+    <span id="progress-pct">0%</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<div class="questions-container" id="questionsContainer">
+  <div class="no-results" id="noResults">No questions match your search.</div>
+</div>
+
+<script>
+const questions = [
+  // ─── CORE CONCEPTS (1–18) ─────────────────────────────────────────────
+  { id:1, cat:"core", diff:"easy", q:"What are the 5 V's of Big Data?", a:"Volume (scale of data), Velocity (speed of data generation/processing), Variety (different types/formats), Veracity (data quality/accuracy), and Value (usefulness of data for decision-making)." },
+  { id:2, cat:"core", diff:"easy", q:"What is the difference between structured, semi-structured, and unstructured data?", a:"Structured: organized in rows/columns (RDBMS). Semi-structured: has tags or markers but no strict schema (JSON, XML, CSV). Unstructured: no predefined format — images, audio, text documents, social media posts." },
+  { id:3, cat:"core", diff:"easy", q:"What is a Data Lake vs a Data Warehouse?", a:"Data Lake stores raw, unprocessed data in any format (schema-on-read). Data Warehouse stores cleaned, transformed, structured data optimized for analytics (schema-on-write). Lakes are cheaper and flexible; warehouses are faster for BI queries." },
+  { id:4, cat:"core", diff:"medium", q:"Explain the CAP theorem and its relevance to Big Data systems.", a:"CAP: a distributed system can only guarantee 2 of 3 — Consistency (every read gets latest write), Availability (every request gets a response), Partition Tolerance (system works despite network splits). In Big Data, partition tolerance is mandatory, so systems choose CA (e.g., RDBMS) or AP (e.g., Cassandra, DynamoDB) or CP (e.g., HBase, Zookeeper)." },
+  { id:5, cat:"core", diff:"medium", q:"What is the Lambda Architecture?", a:"A data processing pattern with 3 layers: Batch Layer (processes all historical data for accuracy), Speed Layer (real-time stream processing for low latency), Serving Layer (merges batch + speed layer views for queries). Addresses both latency and accuracy trade-offs." },
+  { id:6, cat:"core", diff:"medium", q:"What is the Kappa Architecture and how does it differ from Lambda?", a:"Kappa simplifies Lambda by removing the batch layer. All data flows through a single stream processing pipeline. Historical reprocessing is done by replaying logs (e.g., Kafka). Simpler to operate but less optimal for some batch workloads." },
+  { id:7, cat:"core", diff:"easy", q:"What is MapReduce and how does it work?", a:"MapReduce is a programming model for parallel processing. Map phase: splits input into key-value pairs and applies a function. Shuffle phase: groups values by key. Reduce phase: aggregates values per key. Enables distributed computation across commodity hardware." },
+  { id:8, cat:"core", diff:"medium", q:"What is data sharding and why is it used in Big Data?", a:"Sharding partitions data horizontally across multiple nodes based on a shard key. Each shard holds a subset of rows. Used to distribute load, improve query performance, and scale horizontally. Trade-offs include cross-shard joins complexity and hot-spot risks." },
+  { id:9, cat:"core", diff:"medium", q:"Explain eventual consistency in distributed systems.", a:"Eventual consistency means replicas may temporarily diverge after a write, but will converge to the same state given enough time with no new updates. Used in highly available systems (Cassandra, DynamoDB). Contrasts with strong consistency where all reads see latest write immediately." },
+  { id:10, cat:"core", diff:"hard", q:"What is data lineage and why is it important?", a:"Data lineage tracks data's origin, transformations, and movement through pipelines. Critical for debugging data issues, ensuring regulatory compliance (GDPR), auditing, impact analysis (what breaks if I change X?), and building trust in data quality." },
+  { id:11, cat:"core", diff:"easy", q:"What is HDFS and how does it store data?", a:"Hadoop Distributed File System stores files split into 128MB blocks distributed across DataNodes. Each block is replicated 3x by default. NameNode tracks metadata (where blocks live). Designed for sequential reads of large files on commodity hardware." },
+  { id:12, cat:"core", diff:"medium", q:"What is a Data Mesh and how does it differ from a centralized data platform?", a:"Data Mesh is a decentralized approach where domain teams own, produce, and serve their own data as products. Contrasts with central data teams owning all pipelines. Key principles: domain ownership, data as a product, self-serve infrastructure, federated governance." },
+  { id:13, cat:"core", diff:"hard", q:"Explain the difference between OLTP and OLAP systems.", a:"OLTP (Online Transaction Processing): optimized for high-volume, low-latency read/write transactions. Normalized schema. Examples: MySQL, PostgreSQL. OLAP (Online Analytical Processing): optimized for complex analytical queries over large datasets. Denormalized (star/snowflake schema). Examples: Redshift, BigQuery, Snowflake." },
+  { id:14, cat:"core", diff:"medium", q:"What is a schema-on-read vs schema-on-write approach?", a:"Schema-on-write: schema defined before data is stored (traditional databases, warehouses) — enforces structure at ingestion. Schema-on-read: raw data stored as-is; structure applied at query time (data lakes). Schema-on-read is flexible but slower; schema-on-write is faster to query but rigid." },
+  { id:15, cat:"core", diff:"easy", q:"What is data serialization and why does format choice matter in Big Data?", a:"Serialization converts data structures into a transmittable/storable format. Format choice affects: storage size (Parquet/ORC compress well), read speed (columnar formats skip unneeded columns), interoperability (Avro is schema-evolution friendly), and write speed (JSON/CSV are simple but bulky)." },
+  { id:16, cat:"core", diff:"medium", q:"What is a columnar storage format and why is it preferred for analytics?", a:"Columnar formats (Parquet, ORC) store data column-by-column instead of row-by-row. Advantages: excellent compression (same-type values compress better), query efficiency (only relevant columns are read), and fast aggregations. Parquet is the de-facto standard in modern data lakes." },
+  { id:17, cat:"core", diff:"hard", q:"What is data skew in distributed processing and how do you handle it?", a:"Data skew occurs when data is unevenly distributed across partitions — some nodes process far more data than others, causing stragglers. Solutions: salting keys (add random prefix to spread keys), repartitioning, using broadcast joins for small tables, and custom partitioners." },
+  { id:18, cat:"core", diff:"medium", q:"What is a streaming vs batch processing paradigm?", a:"Batch: processes bounded datasets at scheduled intervals (hourly, daily). Higher latency but simpler and efficient for large volumes. Streaming: processes unbounded data in real-time or micro-batches. Lower latency but more complex state management. Tools: Spark (batch/micro-batch), Flink/Kafka Streams (streaming)." },
+
+  // ─── PYTHON (19–38) ───────────────────────────────────────────────────
+  { id:19, cat:"python", diff:"easy", q:"How do you read a large CSV file in Python without loading it all into memory?", a:"Use pandas with `chunksize` parameter: `for chunk in pd.read_csv('file.csv', chunksize=10000): process(chunk)`. Alternatively use Dask (`dd.read_csv()`), Polars (lazy evaluation), or Python's built-in `csv` module with a generator pattern." },
+  { id:20, cat:"python", diff:"medium", q:"What is PySpark and how does it relate to Apache Spark?", a:"PySpark is the Python API for Apache Spark, enabling Python users to write Spark programs. It uses Py4J to bridge Python and the JVM-based Spark engine. Supports DataFrames, RDDs, SQL, Streaming, and MLlib. Code is submitted via `SparkContext` or `SparkSession`." },
+  { id:21, cat:"python", diff:"medium", q:"Explain the difference between RDDs, DataFrames, and Datasets in Spark.", a:"RDD (Resilient Distributed Dataset): low-level, type-safe, functional API — no optimization. DataFrame: distributed table with named columns, Catalyst optimizer applies, Python/R/Scala friendly. Dataset: type-safe DataFrame (Scala/Java only). DataFrames are preferred for most workloads due to optimizer benefits." },
+  { id:22, cat:"python", diff:"medium", q:"How do you perform a groupBy aggregation in PySpark?", a:'`df.groupBy("category").agg(F.sum("amount").alias("total"), F.count("id").alias("cnt"))`. Import `from pyspark.sql import functions as F`. Can chain multiple aggregations. Use `.orderBy()` after for sorting.' },
+  { id:23, cat:"python", diff:"hard", q:"What are broadcast variables and accumulators in Spark?", a:"Broadcast variables: read-only variables cached on each worker node, avoiding repeated serialization of large lookup tables. Use `sc.broadcast(dict)` then `.value` to access. Accumulators: write-only (from workers) counters/sums that the driver can read. Useful for debugging and metrics counting across partitions." },
+  { id:24, cat:"python", diff:"medium", q:"How does Dask differ from Pandas and when would you use it?", a:"Dask parallelizes Pandas operations across multiple cores or a cluster using lazy evaluation. Use Dask when data is too large for RAM (>10GB), or when you need distributed computation. Dask mimics the Pandas API but builds a task graph executed on `.compute()`. Polars is an alternative with better single-node performance." },
+  { id:25, cat:"python", diff:"medium", q:"What is lazy evaluation in Spark and why does it matter?", a:"Spark doesn't execute transformations (map, filter, join) immediately — it builds a DAG (Directed Acyclic Graph) of operations. Execution only triggers on an action (collect, count, write). This enables the Catalyst optimizer to reorder, prune, and optimize the entire plan before running." },
+  { id:26, cat:"python", diff:"easy", q:"How do you write a PySpark DataFrame to Parquet with partitioning?", a:'`df.write.mode("overwrite").partitionBy("year","month").parquet("s3://bucket/path/")`. Partitioning creates directory structure (year=2024/month=01/) enabling partition pruning — queries filter only relevant directories.' },
+  { id:27, cat:"python", diff:"hard", q:"Explain window functions in PySpark with an example.", a:'Window functions compute results across a set of rows related to the current row. Example: `from pyspark.sql.window import Window; w = Window.partitionBy("dept").orderBy("salary"); df.withColumn("rank", F.rank().over(w))`. Common functions: rank(), dense_rank(), row_number(), lag(), lead(), sum() over window.' },
+  { id:28, cat:"python", diff:"medium", q:"How do you handle schema inference vs explicit schema in PySpark?", a:'Schema inference (`inferSchema=True`) reads data to guess types — slow for large files. Explicit schema is preferred: `schema = StructType([StructField("id", IntegerType()), StructField("name", StringType())]); spark.read.schema(schema).csv("file.csv")`. Always define schema in production for performance and correctness.' },
+  { id:29, cat:"python", diff:"medium", q:"What is the Pandas-on-Spark (formerly Koalas) API?", a:"Pandas-on-Spark (pyspark.pandas) allows writing Pandas-like code that runs distributed on Spark. Useful for migrating existing Pandas code to Spark with minimal changes. Not 100% feature-complete and can be slower than native Spark DataFrames due to translation overhead." },
+  { id:30, cat:"python", diff:"hard", q:"How do you optimize a slow PySpark job?", a:"Key strategies: (1) Cache/persist intermediate DataFrames used multiple times, (2) Use broadcast joins for small tables, (3) Repartition to avoid skew, (4) Filter and project early (predicate pushdown), (5) Use Parquet/ORC formats, (6) Tune `spark.sql.shuffle.partitions` (default 200 is often wrong), (7) Avoid Python UDFs — use built-in SQL functions." },
+  { id:31, cat:"python", diff:"medium", q:"What is Apache Kafka and how do you consume it with Python?", a:"Kafka is a distributed event streaming platform. Python clients: `confluent-kafka` (high performance, librdkafka-based) or `kafka-python`. Example: `consumer = KafkaConsumer('topic', bootstrap_servers='host:9092'); for msg in consumer: process(msg.value)`. For structured streaming, use PySpark's `spark.readStream.format('kafka')`." },
+  { id:32, cat:"python", diff:"easy", q:"How do you use Python generators for processing large files?", a:"Generators yield one item at a time without loading everything into memory. Example: `def read_lines(file): with open(file) as f: for line in f: yield json.loads(line)`. Pipeline them: `result = sum(r['amount'] for r in read_lines('data.jsonl') if r['type']=='sale')`. Memory-efficient for ETL." },
+  { id:33, cat:"python", diff:"medium", q:"What is PyArrow and why is it important in the Big Data ecosystem?", a:"PyArrow is a Python library implementing Apache Arrow — an in-memory columnar format. Enables zero-copy data sharing between Python, Pandas, Spark, and DuckDB. Used under the hood by Parquet reading (pyarrow.parquet), Pandas 2.0 backend, and Polars. Critical for interoperability and performance." },
+  { id:34, cat:"python", diff:"hard", q:"How do you implement incremental data loading in Python/PySpark?", a:"Track high-watermark (max timestamp or ID from last run). On next run: read only new records where timestamp > watermark. Store watermark in a metadata table or file. Example: `new_data = spark.read.parquet(source).filter(F.col('updated_at') > last_run_ts)`. Delta Lake / Iceberg simplify this with built-in change data capture." },
+  { id:35, cat:"python", diff:"medium", q:"Explain the use of Polars vs Pandas for Big Data workloads.", a:"Polars is written in Rust with a multi-threaded, lazy evaluation engine. Advantages over Pandas: 5–100x faster for many operations, handles data larger than RAM via streaming, no GIL, consistent memory layout. Downside: smaller ecosystem and different API. Ideal for single-node large-file processing." },
+  { id:36, cat:"python", diff:"hard", q:"How does Spark handle fault tolerance using lineage?", a:"Spark tracks each RDD's lineage (DAG of transformations applied). If a partition is lost, Spark recomputes it from the original source using the recorded transformations — no replication needed. Checkpointing breaks the lineage chain for long chains, writing data to disk to avoid recomputation from scratch." },
+  { id:37, cat:"python", diff:"medium", q:"What is Delta Lake and how do you use it with PySpark?", a:'Delta Lake adds ACID transactions, versioning, and schema enforcement to data lakes. Usage: `df.write.format("delta").save("/path/to/table")`. Features: time travel (`spark.read.format("delta").option("versionAsOf", 3).load(path)`), merge/upsert, schema evolution, and automatic compaction. Built on Parquet + transaction log.' },
+  { id:38, cat:"python", diff:"easy", q:"How do you profile and debug performance bottlenecks in PySpark?", a:"Use `df.explain(True)` to inspect physical/logical query plan. Use Spark UI (port 4040) to view stages, tasks, and shuffle metrics. Look for: wide transformations (shuffles), skewed tasks, spill to disk. Use `spark.sparkContext.setLogLevel('DEBUG')` for detailed logs. `.cache()` + `.count()` to measure stage timings." },
+
+  // ─── SQL (39–58) ──────────────────────────────────────────────────────
+  { id:39, cat:"sql", diff:"easy", q:"What is a window function in SQL and give an example?", a:"Window functions perform calculations across a set of related rows without collapsing them. Example: `SELECT name, salary, AVG(salary) OVER (PARTITION BY dept ORDER BY hire_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS rolling_avg FROM employees;` Functions: ROW_NUMBER(), RANK(), LAG(), LEAD(), SUM() OVER()." },
+  { id:40, cat:"sql", diff:"easy", q:"What is the difference between RANK(), DENSE_RANK(), and ROW_NUMBER()?", a:"ROW_NUMBER(): unique sequential integers, no ties. RANK(): same rank for ties, gaps in sequence (1,1,3). DENSE_RANK(): same rank for ties, no gaps (1,1,2). Example: salaries [100,100,80] → ROW_NUMBER: 1,2,3 | RANK: 1,1,3 | DENSE_RANK: 1,1,2." },
+  { id:41, cat:"sql", diff:"medium", q:"Explain the difference between INNER JOIN, LEFT JOIN, FULL OUTER JOIN, and CROSS JOIN.", a:"INNER JOIN: only matching rows from both tables. LEFT JOIN: all rows from left + matching from right (NULLs for no match). FULL OUTER JOIN: all rows from both, NULLs where no match. CROSS JOIN: cartesian product — every row of left joined with every row of right. N×M rows total." },
+  { id:42, cat:"sql", diff:"medium", q:"What is a CTE (Common Table Expression) and when should you use it?", a:"CTEs use the WITH clause to define named temp result sets for readability and reuse within a query. `WITH cte AS (SELECT dept, AVG(salary) avg_sal FROM emp GROUP BY dept) SELECT * FROM emp e JOIN cte ON e.dept=cte.dept`. Use for recursive queries, breaking complex logic into steps, and replacing subqueries." },
+  { id:43, cat:"sql", diff:"hard", q:"How would you find the second highest salary in a table without using LIMIT/TOP?", a:"`SELECT MAX(salary) FROM employees WHERE salary < (SELECT MAX(salary) FROM employees);` Or with window: `SELECT salary FROM (SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) rnk FROM employees) t WHERE rnk = 2 LIMIT 1;`" },
+  { id:44, cat:"sql", diff:"medium", q:"What are indexes and how do they improve query performance?", a:"Indexes are data structures (B-tree, hash, bitmap) that allow fast lookup without full table scan. B-tree indexes support range queries and equality. Bitmap indexes (Redshift, Oracle) are efficient for low-cardinality columns. Trade-off: faster reads, slower writes, more storage. Composite indexes: order matters — most selective column first." },
+  { id:45, cat:"sql", diff:"hard", q:"What is query optimization in BigQuery and how does the query planner work?", a:"BigQuery uses a distributed query engine (Dremel). Optimizer applies: predicate pushdown, column pruning (reads only referenced columns from Parquet/Capacitor), partition elimination, and join reordering. Use `EXPLAIN` in other systems; in BigQuery, Query Plan in the console shows stages, input bytes, and shuffle costs." },
+  { id:46, cat:"sql", diff:"medium", q:"What is partitioning in SQL and how does it help Big Data queries?", a:"Table partitioning divides a table into sub-tables by a column (date, region). Queries filtering on the partition key only scan relevant partitions — massive I/O savings. In BigQuery: `PARTITION BY DATE(created_at)`. In Hive: `PARTITIONED BY (year INT, month INT)`. Always filter on partition column to enable pruning." },
+  { id:47, cat:"sql", diff:"medium", q:"Explain the difference between UNION and UNION ALL.", a:"UNION removes duplicate rows (sorts and deduplicates — expensive). UNION ALL keeps all rows including duplicates — much faster. Use UNION ALL unless you specifically need deduplication. In Big Data, UNION ALL is strongly preferred for performance." },
+  { id:48, cat:"sql", diff:"hard", q:"How do you write a recursive SQL query? Give an example.", a:"Use recursive CTEs. Example — employee hierarchy: `WITH RECURSIVE tree AS (SELECT id, name, manager_id, 0 AS level FROM emp WHERE manager_id IS NULL UNION ALL SELECT e.id, e.name, e.manager_id, t.level+1 FROM emp e JOIN tree t ON e.manager_id=t.id) SELECT * FROM tree ORDER BY level;`" },
+  { id:49, cat:"sql", diff:"medium", q:"What is a materialized view and when should you use it?", a:"A materialized view stores precomputed query results physically. Unlike regular views (recompute on query), materialized views are refreshed periodically. Use for: expensive aggregations queried frequently, summary tables, reducing warehouse compute costs. Supported in: BigQuery, Redshift, Snowflake, PostgreSQL." },
+  { id:50, cat:"sql", diff:"easy", q:"How do you calculate a running total in SQL?", a:"`SELECT order_date, amount, SUM(amount) OVER (ORDER BY order_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total FROM orders;` The window frame `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` ensures cumulative sum." },
+  { id:51, cat:"sql", diff:"hard", q:"What is the difference between EXISTS and IN for subqueries — which is faster?", a:"EXISTS stops at first match (short-circuits) and works well with correlated subqueries. IN evaluates the entire subquery and compares against the result set. For large subquery results, EXISTS is generally faster. For NULLs: IN with NULLs can produce unexpected results (NULL comparison); EXISTS handles NULLs correctly." },
+  { id:52, cat:"sql", diff:"medium", q:"What are slowly changing dimensions (SCDs) and how are they implemented in SQL?", a:"SCDs track historical changes in dimension tables. Type 1: overwrite (no history). Type 2: add new row with effective dates and active flag — most common. Type 3: add new column for previous value. Type 2 SQL: INSERT new row with current_flag='Y', UPDATE old row setting current_flag='N' and end_date." },
+  { id:53, cat:"sql", diff:"medium", q:"How does a star schema differ from a snowflake schema?", a:"Star schema: fact table connected directly to denormalized dimension tables. Simple, fast queries. Snowflake schema: dimension tables further normalized into sub-dimensions. Saves storage but requires more joins. In Big Data/OLAP, star schema is preferred for query performance; snowflake for storage efficiency." },
+  { id:54, cat:"sql", diff:"hard", q:"How would you find and remove duplicates from a large table efficiently?", a:"Identify: `SELECT id, COUNT(*) FROM t GROUP BY id HAVING COUNT(*) > 1`. Remove keeping one: `DELETE FROM t WHERE rowid NOT IN (SELECT MIN(rowid) FROM t GROUP BY id)`. In BigQuery/Hive: use ROW_NUMBER() to flag duplicates then OVERWRITE the table with deduplicated data." },
+  { id:55, cat:"sql", diff:"medium", q:"What is the PIVOT/UNPIVOT operation in SQL?", a:"PIVOT transforms rows into columns (wide format). UNPIVOT does the reverse. Example PIVOT: `SELECT * FROM sales PIVOT (SUM(amount) FOR quarter IN ('Q1','Q2','Q3','Q4'))`. In databases without PIVOT: use conditional aggregation `SUM(CASE WHEN quarter='Q1' THEN amount END) AS Q1`." },
+  { id:56, cat:"sql", diff:"easy", q:"What is the difference between WHERE and HAVING clauses?", a:"WHERE filters rows before aggregation — can't reference aggregate functions. HAVING filters groups after GROUP BY — can reference aggregates. `SELECT dept, SUM(salary) total FROM emp WHERE active=1 GROUP BY dept HAVING SUM(salary) > 100000;` Always filter in WHERE when possible — HAVING is evaluated later." },
+  { id:57, cat:"sql", diff:"hard", q:"Explain query cost and cardinality estimation in distributed SQL engines.", a:"Query planners estimate cardinality (row counts) for each operation using statistics (table stats, histograms). Poor estimates lead to bad join order, wrong join strategies (hash vs broadcast), or excessive shuffles. Solutions: keep statistics updated (ANALYZE), use hints, or partition/bucket tables to help the optimizer." },
+  { id:58, cat:"sql", diff:"medium", q:"What is Z-ordering (clustering) in Delta Lake / Iceberg and why does it matter?", a:"Z-ordering is a multi-dimensional clustering technique that co-locates related data within files based on multiple columns simultaneously. `OPTIMIZE table ZORDER BY (user_id, event_date)`. Improves data skipping for queries filtering on those columns. Unlike single-column sorting, Z-order works for multi-column filter predicates." },
+
+  // ─── ARCHITECTURE (59–77) ─────────────────────────────────────────────
+  { id:59, cat:"architecture", diff:"medium", q:"Describe the modern data stack and its key components.", a:"Ingestion: Fivetran, Airbyte, Kafka. Storage: S3/GCS/ADLS (data lake) + Snowflake/BigQuery/Redshift (warehouse). Transformation: dbt (SQL-based transformations). Orchestration: Airflow, Prefect, Dagster. Reverse ETL: Hightouch, Census. BI: Looker, Tableau, Metabase. Observability: Monte Carlo, Soda." },
+  { id:60, cat:"architecture", diff:"medium", q:"What is a Lakehouse architecture?", a:"Lakehouse combines the low-cost storage of a data lake with the ACID transactions, schema enforcement, and performance of a data warehouse. Implemented with Delta Lake, Apache Iceberg, or Apache Hudi on cloud object storage. Eliminates the need to maintain separate lake and warehouse systems." },
+  { id:61, cat:"architecture", diff:"hard", q:"How does Apache Kafka guarantee message ordering and exactly-once delivery?", a:"Ordering: guaranteed within a partition, not across partitions. Assign messages with the same key to the same partition. Exactly-once semantics (EOS): enabled via idempotent producers (`enable.idempotence=true`), transactional producers, and consumers reading only committed offsets (`isolation.level=read_committed`)." },
+  { id:62, cat:"architecture", diff:"medium", q:"What is Apache Flink and how does it handle stateful stream processing?", a:"Flink is a stateful stream processing engine with true event-time processing and exactly-once guarantees. State is managed in RocksDB or heap, checkpointed to durable storage (S3, HDFS). Supports keyed state (per-key) and operator state (per-partition). Uses watermarks to handle out-of-order events." },
+  { id:63, cat:"architecture", diff:"medium", q:"What is an ELT vs ETL pipeline and which is preferred in modern Big Data?", a:"ETL (Extract-Transform-Load): transform before loading into warehouse. ELT (Extract-Load-Transform): load raw data first, then transform inside the warehouse using SQL (dbt). Modern cloud warehouses have compute power to transform in-place, making ELT preferred — raw data preserved, more flexible, easier to iterate." },
+  { id:64, cat:"architecture", diff:"medium", q:"Explain the concept of data partitioning strategies in distributed systems.", a:"Range partitioning: by value range (e.g., dates). Hash partitioning: consistent hashing distributes evenly. Round-robin: sequential distribution, no key. List partitioning: explicit value lists. Composite: combine strategies. Choice affects query performance (range enables pruning), write scalability, and hotspot risk." },
+  { id:65, cat:"architecture", diff:"hard", q:"What is consistent hashing and why is it used in Big Data systems?", a:"Consistent hashing maps both data and nodes onto a hash ring. When nodes are added/removed, only a fraction of keys need redistribution (vs traditional modulo hashing which remaps everything). Used in: Cassandra (vnodes), DynamoDB, Riak. Minimizes data movement during cluster scaling." },
+  { id:66, cat:"architecture", diff:"medium", q:"What is Apache Airflow and how do you design a data pipeline DAG?", a:"Airflow is a workflow orchestration platform. Pipelines are Python DAGs (Directed Acyclic Graphs) with tasks connected by dependencies. Key components: Scheduler (triggers tasks), Executor (runs tasks), DAG (workflow definition), Operators (BashOperator, PythonOperator, SparkSubmitOperator). Best practices: idempotent tasks, parameterized DAGs, SLA monitoring." },
+  { id:67, cat:"architecture", diff:"hard", q:"What are the key differences between Kafka, Kinesis, and Pub/Sub for streaming ingestion?", a:"Kafka: open-source, self-managed or Confluent/MSK, high throughput, infinite retention, complex ops. Kinesis: AWS managed, simpler ops, limited retention (7 days max), priced per shard. Google Pub/Sub: GCP managed, auto-scaling, at-least-once delivery, no ordering guarantee per default. Choose based on cloud lock-in tolerance, retention needs, and ops capacity." },
+  { id:68, cat:"architecture", diff:"medium", q:"What is a medallion architecture (Bronze/Silver/Gold layers)?", a:"Medallion architecture organizes a data lakehouse into: Bronze (raw, as-ingested data — append-only), Silver (cleaned, validated, deduplicated data), Gold (aggregated, business-ready data for analytics/ML). Each layer adds quality. Implemented with Delta Lake or Iceberg. Enables raw data preservation and multiple refinement levels." },
+  { id:69, cat:"architecture", diff:"hard", q:"How does Apache Iceberg handle time travel and schema evolution?", a:"Iceberg maintains a tree of metadata: Catalog → Table metadata → Snapshots → Manifest Lists → Manifests → Data files. Time travel: query any snapshot by ID or timestamp. Schema evolution: add/rename/drop columns safely without rewriting data — column IDs are stable, not names. Hidden partitioning: partition spec changes without rewriting old data." },
+  { id:70, cat:"architecture", diff:"medium", q:"What is a data contract and why is it important in data engineering?", a:"A data contract is a formal agreement between data producers and consumers defining schema, data types, SLAs, quality expectations, and ownership. Prevents pipeline breaks caused by upstream schema changes. Tools: Soda, Great Expectations, custom schema registries. Encourages treating data as a product." },
+  { id:71, cat:"architecture", diff:"hard", q:"Explain RAFT consensus algorithm in the context of distributed databases.", a:"RAFT is a consensus algorithm ensuring all nodes agree on a value. A leader is elected; all writes go through the leader, which replicates to followers. A write commits when a majority (quorum) acknowledges it. If the leader fails, a new election occurs. Used in: etcd, CockroachDB, TiDB. Provides strong consistency with partition tolerance (CP in CAP)." },
+  { id:72, cat:"architecture", diff:"medium", q:"What is the role of a message broker in a Big Data pipeline?", a:"Message brokers (Kafka, RabbitMQ, Pub/Sub) decouple producers from consumers, buffer data during spikes, enable fan-out (one topic → multiple consumers), and provide durability. In Big Data: Kafka acts as the central nervous system — connecting operational systems, stream processors, and data lakes." },
+  { id:73, cat:"architecture", diff:"hard", q:"How would you design a real-time fraud detection system at scale?", a:"Architecture: Events → Kafka → Flink/Spark Streaming (feature computation, model scoring) → Redis (real-time feature store, velocity checks) → Decision engine → Block/flag + alerts → Batch feedback loop (Delta Lake → model retraining → model registry → deploy). Key: sub-100ms latency, high throughput, low false-positive rate." },
+  { id:74, cat:"architecture", diff:"medium", q:"What is a feature store in the context of ML + Big Data?", a:"A feature store is a centralized repository for ML features, enabling reuse across models, ensuring training-serving consistency, and providing both offline (batch) and online (low-latency) access. Examples: Feast, Tecton, Vertex AI Feature Store. Solves the problem of recomputing features and training-serving skew." },
+  { id:75, cat:"architecture", diff:"easy", q:"What is cloud-native Big Data and how does object storage change the architecture?", a:"Cloud-native Big Data decouples compute from storage using cloud object storage (S3, GCS, ADLS) as the persistence layer. Compute clusters (Spark, Presto, Trino) spin up/down elastically. Benefits: near-infinite cheap storage, no storage-compute coupling, multiple engines on same data. This enabled the Lakehouse pattern." },
+  { id:76, cat:"architecture", diff:"hard", q:"What is a reverse ETL and when would you use it?", a:"Reverse ETL syncs data from the warehouse back into operational systems (CRMs, ad platforms, support tools). Example: sync customer segments from Snowflake to Salesforce for sales targeting. Tools: Hightouch, Census, Polytomic. Used to operationalize analytics — turn insights into actions in business tools." },
+  { id:77, cat:"architecture", diff:"medium", q:"Explain the role of a schema registry in a streaming architecture.", a:"A schema registry (Confluent Schema Registry, AWS Glue Schema Registry) stores and validates Avro/Protobuf/JSON schemas for Kafka topics. Producers register schemas; consumers fetch and deserialize using the registered schema. Enables schema evolution with compatibility checks (backward, forward, full). Prevents deserialization failures from schema changes." },
+
+  // ─── TOOLS & ECOSYSTEM (78–89) ────────────────────────────────────────
+  { id:78, cat:"tools", diff:"easy", q:"What is dbt and what problem does it solve?", a:"dbt (data build tool) lets analysts write modular SQL SELECT statements that dbt compiles into DDL/DML and runs in the warehouse. Solves: no versioning of SQL transformations, manual dependency management, no testing. Features: ref() for dependencies, schema tests, documentation generation, incremental models." },
+  { id:79, cat:"tools", diff:"medium", q:"What is Apache Hive and when would you still use it?", a:"Hive provides SQL-like querying (HiveQL) on top of HDFS/Hadoop. Translates queries to MapReduce/Tez/Spark jobs. Use cases: legacy Hadoop environments, Hive Metastore (widely used as catalog by Spark, Presto, Trino even without Hive itself). Being replaced by modern engines like Trino/Spark SQL in new architectures." },
+  { id:80, cat:"tools", diff:"medium", q:"What is Presto/Trino and how does it differ from Spark SQL?", a:"Trino (fork of Presto) is an MPP (Massively Parallel Processing) SQL engine for interactive ad-hoc queries across heterogeneous sources (S3, Hive, Iceberg, RDBMS, Kafka) without moving data. Spark SQL is batch-oriented with full DataFrame/ML ecosystem. Trino: lower latency for ad-hoc; Spark: better for complex ETL pipelines." },
+  { id:81, cat:"tools", diff:"easy", q:"What is Apache Zookeeper and what role does it play in Big Data clusters?", a:"Zookeeper is a distributed coordination service providing: leader election, distributed locking, configuration management, service discovery, and naming. Used by Kafka (broker coordination — being replaced by KRaft), HBase (master election), and Hadoop (HDFS HA). Being phased out in newer systems in favor of internal Raft-based consensus." },
+  { id:82, cat:"tools", diff:"medium", q:"What is Databricks and how does it extend Apache Spark?", a:"Databricks is a unified data analytics platform built on Apache Spark, providing: managed Spark clusters, Delta Lake (ACID transactions on data lakes), MLflow (ML lifecycle management), collaborative notebooks, Unity Catalog (governance), and Photon (C++ query engine). Available on AWS, Azure, GCP." },
+  { id:83, cat:"tools", diff:"medium", q:"What is Great Expectations and how does it enable data quality testing?", a:"Great Expectations is a Python framework for data validation. Define 'expectations' (e.g., column values not null, min/max range, unique values) as tests. Integrate into pipelines to fail fast on bad data. Generates data documentation automatically. Works with Pandas, Spark, SQL sources. Companion to dbt for data quality." },
+  { id:84, cat:"tools", diff:"medium", q:"What is Apache HBase and when would you use it over Cassandra?", a:"HBase is a column-family NoSQL store on top of HDFS, providing strong consistency and HBase-specific integrations with Hadoop ecosystem. Cassandra is peer-to-peer, eventually consistent, with no single point of failure. Use HBase: when you need strong consistency + Hadoop integration. Use Cassandra: when you need high availability + no SPOF + multi-region writes." },
+  { id:85, cat:"tools", diff:"easy", q:"What is Apache Parquet and what makes it efficient for analytics?", a:"Parquet is an open-source, column-oriented binary file format. Efficiency: column pruning (read only needed columns), predicate pushdown (skip row groups), excellent compression (dictionary encoding, RLE, snappy/zstd), and nested data support. Supported by virtually all Big Data tools: Spark, Hive, Presto, BigQuery, Pandas, Polars." },
+  { id:86, cat:"tools", diff:"medium", q:"What is Snowflake's architecture and what makes it different from traditional data warehouses?", a:"Snowflake separates storage (S3/GCS/ADLS), compute (Virtual Warehouses — independent MPP clusters), and cloud services (query optimizer, metadata). Multiple VWs can query the same data simultaneously without contention. Zero management, auto-scaling, time travel (90 days), data sharing across accounts. No indexes to manage." },
+  { id:87, cat:"tools", diff:"hard", q:"What is Apache Arrow Flight and how does it improve data transfer performance?", a:"Arrow Flight is a high-performance RPC framework built on gRPC using Apache Arrow in-memory format for data transport. Eliminates serialization/deserialization overhead — data transferred in Arrow format end-to-end. Used in: DuckDB data exchange, ADBC (Arrow Database Connectivity), and inter-service data movement in ML pipelines." },
+  { id:88, cat:"tools", diff:"medium", q:"What is DuckDB and what are its strengths for Big Data analytics?", a:"DuckDB is an in-process analytical database (think SQLite for OLAP). Strengths: vectorized execution engine, directly queries Parquet/CSV/JSON files without loading, columnar storage, parallel query execution, can read from S3, zero dependencies. Ideal for: local analytics, testing pipelines, replacing Pandas for medium datasets (<50GB)." },
+  { id:89, cat:"tools", diff:"medium", q:"What is MLflow and how does it integrate with Big Data pipelines?", a:"MLflow is an open-source ML lifecycle platform with: Tracking (log parameters, metrics, artifacts per run), Projects (reproducible environments), Models (model registry with versioning and stage promotion), and Recipes (pipeline templates). Integrates with Spark (log Spark params), Delta Lake (version training data), and Databricks." },
+
+  // ─── OPTIMIZATION (90–100) ────────────────────────────────────────────
+  { id:90, cat:"optimization", diff:"medium", q:"What is partition pruning and how does it reduce query cost?", a:"Partition pruning skips irrelevant partitions at query planning time when a filter matches the partition column. Example: `WHERE event_date = '2024-01-15'` on a date-partitioned table only reads files in the 2024-01-15 partition — potentially scanning 1/365th of the table. Critical for cost and speed in BigQuery, Hive, Spark, Iceberg." },
+  { id:91, cat:"optimization", diff:"hard", q:"Explain the Catalyst optimizer and Tungsten execution engine in Spark.", a:"Catalyst: Spark's query optimizer — takes a logical plan, applies rules (predicate pushdown, constant folding, column pruning), and generates an optimized physical plan. Tungsten: focuses on runtime performance — off-heap memory management (bypasses GC), cache-aware computations, code generation (whole-stage codegen compiles query stages to JVM bytecode)." },
+  { id:92, cat:"optimization", diff:"medium", q:"What is file compaction and why is it important in Delta Lake/Iceberg?", a:"Streaming and frequent small writes create many small files, which hurt read performance (too many file opens, poor compression). Compaction merges small files into larger, optimally-sized files (128MB–1GB). `OPTIMIZE table` in Delta Lake. Iceberg has `rewriteDataFiles` action. Schedule compaction regularly in production pipelines." },
+  { id:93, cat:"optimization", diff:"hard", q:"How do broadcast hash joins work in Spark and when should you use them?", a:"Broadcast join: the smaller table is serialized and sent to every executor — no shuffle needed for the larger table. Triggered automatically when the smaller table is below `spark.sql.autoBroadcastJoinThreshold` (default 10MB) or manually with `broadcast(df)` hint. Use when one side is small (<200MB). Avoids the most expensive Spark operation: shuffle." },
+  { id:94, cat:"optimization", diff:"medium", q:"What is data skipping and how do column statistics enable it?", a:"Column statistics (min/max, null count, distinct count per data file) allow query engines to skip entire files/row groups when a filter predicate can be proven false from statistics alone. Example: file stats show max(amount)=500; query filters amount > 1000 → skip file. Parquet stores row group stats; Iceberg/Delta extend this with table-level stats." },
+  { id:95, cat:"optimization", diff:"medium", q:"What is caching in Spark and when should you use `.persist()` vs `.cache()`?", a:"`.cache()` is shorthand for `.persist(StorageLevel.MEMORY_AND_DISK)`. `.persist()` lets you choose storage level: MEMORY_ONLY, MEMORY_AND_DISK, DISK_ONLY, OFF_HEAP. Cache DataFrames used multiple times within the same application. Always unpersist when done (`df.unpersist()`). Don't cache data used only once." },
+  { id:96, cat:"optimization", diff:"hard", q:"Explain Adaptive Query Execution (AQE) in Spark 3.x.", a:"AQE dynamically re-optimizes query plans at runtime based on actual statistics gathered during execution. Features: (1) Dynamically coalescing shuffle partitions (avoids too many small partitions), (2) Switching join strategies (converts sort-merge to broadcast join when a side turns out small), (3) Skew join optimization (splits skewed partitions). Enable with `spark.sql.adaptive.enabled=true`." },
+  { id:97, cat:"optimization", diff:"medium", q:"What are the best practices for choosing the right number of Spark partitions?", a:"Rule of thumb: 2–4 partitions per CPU core. Target 128MB–1GB per partition for batch jobs; smaller for streaming. Avoid too few (CPU underutilization) or too many (overhead). Use `repartition(n)` to increase (causes full shuffle) or `coalesce(n)` to decrease (no full shuffle, avoids moving data unnecessarily). Check shuffle partition count: `spark.sql.shuffle.partitions`." },
+  { id:98, cat:"optimization", diff:"hard", q:"How do you optimize BigQuery queries for cost and performance?", a:"(1) Partition and cluster tables — query only relevant partitions. (2) SELECT only needed columns — avoid SELECT *. (3) Use BI Engine for repeated dashboard queries. (4) Leverage materialized views. (5) Estimate bytes billed before running (`--dry_run`). (6) Use query result caching. (7) Avoid self-joins and large CROSS JOINs. (8) Prefer INT64 over STRING for join keys." },
+  { id:99, cat:"optimization", diff:"medium", q:"What is predicate pushdown and how does it optimize queries in Spark/Presto?", a:"Predicate pushdown moves filter conditions as close to the data source as possible — ideally into the storage layer. Spark pushes predicates to Parquet readers to skip row groups. Presto/Trino pushes predicates to connectors (Hive, Iceberg, JDBC). Result: far less data read from disk. Avoid wrapping columns in functions (e.g., `YEAR(date)=2024`) which block pushdown — use range predicates instead." },
+  { id:100, cat:"optimization", diff:"hard", q:"How would you design a cost-efficient, high-performance data pipeline processing 10TB of data daily?", a:"Architecture: (1) Ingest via Kafka with Avro+Schema Registry for reliable streaming. (2) Land raw data in S3 in Parquet/Iceberg format partitioned by date. (3) Process with Spark on Spot/Preemptible instances (60–80% cost savings). (4) Use AQE, broadcast joins, and partition pruning for efficiency. (5) Compact files nightly. (6) Serve with Trino for ad-hoc SQL over the lake. (7) Monitor with Airflow + Great Expectations data quality checks. Estimated cost: ~$500–2000/day depending on cloud." }
+];
+
+let activeFilter = 'all';
+let answered = new Set(JSON.parse(localStorage.getItem('bd_answered') || '[]'));
+let openCards = new Set();
+
+function saveAnswered() {
+  localStorage.setItem('bd_answered', JSON.stringify([...answered]));
+}
+
+function updateProgress() {
+  const total = questions.length;
+  const done = answered.size;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('answered-count').textContent = done;
+  document.getElementById('progress-label').textContent = `${done} / ${total} completed`;
+  document.getElementById('progress-pct').textContent = `${pct}%`;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function getCatClass(cat) {
+  return 'tag-' + cat;
+}
+
+function getDiffClass(diff) {
+  return 'diff-' + diff;
+}
+
+function renderQuestions(filtered) {
+  const container = document.getElementById('questionsContainer');
+  const noResults = document.getElementById('noResults');
+
+  // Clear existing cards (keep no-results)
+  [...container.querySelectorAll('.q-card, .section-header')].forEach(el => el.remove());
+
+  if (filtered.length === 0) {
+    noResults.style.display = 'block';
+    return;
+  }
+  noResults.style.display = 'none';
+
+  filtered.forEach((q, idx) => {
+    const card = document.createElement('div');
+    card.className = 'q-card' + (answered.has(q.id) ? ' answered' : '') + (openCards.has(q.id) ? ' open' : '');
+    card.dataset.cat = q.cat;
+    card.dataset.id = q.id;
+    card.style.animationDelay = Math.min(idx * 0.03, 0.5) + 's';
+
+    const catLabel = q.cat.charAt(0).toUpperCase() + q.cat.slice(1);
+
+    card.innerHTML = `
+      <div class="q-header">
+        <div class="q-num">#${String(q.id).padStart(3,'0')}</div>
+        <div style="flex:1">
+          <div class="q-meta">
+            <span class="q-tag ${getCatClass(q.cat)}">${catLabel}</span>
+            <span class="diff-badge ${getDiffClass(q.diff)}">${q.diff}</span>
+          </div>
+          <div class="q-text">${q.q}</div>
+        </div>
+      </div>
+      <div class="q-answer">${q.a}</div>
+      <div class="q-toggle"><span class="q-toggle-icon">▼</span> <span class="toggle-txt">${openCards.has(q.id) ? 'Hide answer' : 'Show answer'}</span></div>
+      <button class="mark-btn" data-id="${q.id}">${answered.has(q.id) ? '✓ Marked done' : '○ Mark as done'}</button>
+    `;
+
+    card.addEventListener('click', (e) => {
+      if (e.target.classList.contains('mark-btn')) return;
+      if (openCards.has(q.id)) {
+        openCards.delete(q.id);
+        card.classList.remove('open');
+        card.querySelector('.toggle-txt').textContent = 'Show answer';
+      } else {
+        openCards.add(q.id);
+        card.classList.add('open');
+        card.querySelector('.toggle-txt').textContent = 'Hide answer';
+      }
+    });
+
+    card.querySelector('.mark-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (answered.has(q.id)) {
+        answered.delete(q.id);
+        card.classList.remove('answered');
+        e.target.textContent = '○ Mark as done';
+      } else {
+        answered.add(q.id);
+        card.classList.add('answered');
+        e.target.textContent = '✓ Marked done';
+      }
+      saveAnswered();
+      updateProgress();
+    });
+
+    container.appendChild(card);
+  });
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let filtered = questions.filter(q => {
+    const matchCat = activeFilter === 'all' || q.cat === activeFilter;
+    const matchSearch = !search || q.q.toLowerCase().includes(search) || q.a.toLowerCase().includes(search);
+    return matchCat && matchSearch;
+  });
+  renderQuestions(filtered);
+}
+
+// Filter buttons
+document.querySelectorAll('.filter-btn[data-cat]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn[data-cat]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.cat;
+    applyFilters();
+  });
+});
+
+// Search
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+// Reset
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (confirm('Reset all progress?')) {
+    answered.clear();
+    openCards.clear();
+    localStorage.removeItem('bd_answered');
+    updateProgress();
+    applyFilters();
+  }
+});
+
+// Init
+updateProgress();
+applyFilters();
+</script>
+</body>
+</html>
